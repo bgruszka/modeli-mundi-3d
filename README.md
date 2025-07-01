@@ -34,7 +34,7 @@ An interactive web application that visualizes different historical models of th
 - **Interactive Sliders**: Fine-tune each light source independently
 - **Visual Feedback**: Live percentage displays for all lighting values
 - **Orbit Toggle**: Hide/show orbital paths and rings for cleaner viewing
-- **Wireframe Toggle**: Hide/show crystalline spheres and geometric elements
+- **Geometry Toggle**: Hide/show all geometric elements (orbits, wireframes, construction lines)
 
 ## Technology Stack
 
@@ -104,7 +104,7 @@ Simply open `index.html` in your web browser (may have limitations with some bro
 - **Reset Button**: Return lighting to default values
 - **Preset Buttons**: Quick lighting scenarios for different viewing preferences
 - **Orbits Button**: Toggle visibility of all orbital paths and rings
-- **Wireframes Button**: Toggle visibility of crystalline spheres and geometric wireframes
+- **Geometry Button**: Toggle visibility of all geometric elements (wireframes, orbits, construction lines)
 
 ### Switching Models
 Click any of the model buttons in the left panel to switch between different historical representations of the universe.
