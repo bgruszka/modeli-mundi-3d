@@ -30,6 +30,14 @@ class UniverseExplorer {
             rim: 0.3
         };
         
+        // Visual element toggles
+        this.visualElements = {
+            orbitsVisible: true,
+            wireframesVisible: true,
+            orbitObjects: [],
+            wireframeObjects: []
+        };
+        
         // Model descriptions
         this.modelInfo = {
             aristotle: {
@@ -531,6 +539,21 @@ class UniverseExplorer {
                 this.applyLightingPreset(preset);
             });
         });
+
+        // Visual element toggle buttons
+        const orbitsBtn = document.getElementById('orbits-btn');
+        orbitsBtn.addEventListener('click', () => {
+            this.visualElements.orbitsVisible = !this.visualElements.orbitsVisible;
+            this.toggleOrbitsVisibility();
+            orbitsBtn.classList.toggle('active', !this.visualElements.orbitsVisible);
+        });
+
+        const wireframesBtn = document.getElementById('wireframes-btn');
+        wireframesBtn.addEventListener('click', () => {
+            this.visualElements.wireframesVisible = !this.visualElements.wireframesVisible;
+            this.toggleWireframesVisibility();
+            wireframesBtn.classList.toggle('active', !this.visualElements.wireframesVisible);
+        });
     }
 
     /**
@@ -590,6 +613,40 @@ class UniverseExplorer {
     }
 
     /**
+     * Toggle orbit visibility
+     */
+    toggleOrbitsVisibility() {
+        this.visualElements.orbitObjects.forEach(orbit => {
+            orbit.visible = this.visualElements.orbitsVisible;
+        });
+    }
+
+    /**
+     * Toggle wireframe visibility
+     */
+    toggleWireframesVisibility() {
+        this.visualElements.wireframeObjects.forEach(wireframe => {
+            wireframe.visible = this.visualElements.wireframesVisible;
+        });
+    }
+
+    /**
+     * Add orbit to tracking array
+     */
+    addOrbitToTracking(orbitObject) {
+        this.visualElements.orbitObjects.push(orbitObject);
+        orbitObject.visible = this.visualElements.orbitsVisible;
+    }
+
+    /**
+     * Add wireframe to tracking array
+     */
+    addWireframeToTracking(wireframeObject) {
+        this.visualElements.wireframeObjects.push(wireframeObject);
+        wireframeObject.visible = this.visualElements.wireframesVisible;
+    }
+
+    /**
      * Switch between different universe models
      */
     switchModel(modelName) {
@@ -626,7 +683,15 @@ class UniverseExplorer {
             if (body.label) {
                 this.scene.remove(body.label);
             }
+            if (body.epicycle) {
+                this.scene.remove(body.epicycle);
+            }
         });
+        
+        // Clear visual element tracking arrays
+        this.visualElements.orbitObjects = [];
+        this.visualElements.wireframeObjects = [];
+        
         this.celestialBodies = {};
         this.time = 0;
     }
@@ -683,6 +748,7 @@ class UniverseExplorer {
             });
             const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
             this.scene.add(sphere);
+            this.addWireframeToTracking(sphere);
 
             // Create celestial body on sphere
             const bodySize = name === 'Sun' ? 2.5 : (name === 'Moon' ? 1 : 1.5);
@@ -704,6 +770,7 @@ class UniverseExplorer {
         });
         const starsSphere = new THREE.Mesh(starsGeometry, starsMaterial);
         this.scene.add(starsSphere);
+        this.addWireframeToTracking(starsSphere);
     }
 
     /**
@@ -737,6 +804,7 @@ class UniverseExplorer {
             const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
             orbit.rotation.x = Math.PI / 2;
             this.scene.add(orbit);
+            this.addOrbitToTracking(orbit);
 
             // Planet
             const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.distance, 0, 0);
@@ -766,6 +834,7 @@ class UniverseExplorer {
                 const epicycle = new THREE.Mesh(epicycleGeometry, epicycleMaterial);
                 epicycle.rotation.x = Math.PI / 2;
                 this.scene.add(epicycle);
+                this.addOrbitToTracking(epicycle);
                 this.celestialBodies[planet.name.toLowerCase()].epicycle = epicycle;
             }
         });
@@ -801,6 +870,7 @@ class UniverseExplorer {
             const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
             orbit.rotation.x = Math.PI / 2;
             this.scene.add(orbit);
+            this.addOrbitToTracking(orbit);
 
             // Planet
             const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.distance, 0, 0);
@@ -854,6 +924,7 @@ class UniverseExplorer {
             const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
             orbit.rotation.x = Math.PI / 2;
             this.scene.add(orbit);
+            this.addOrbitToTracking(orbit);
 
             this.celestialBodies[moon.name.toLowerCase()] = {
                 object: moonBody,
@@ -901,6 +972,7 @@ class UniverseExplorer {
             });
             const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
             this.scene.add(orbit);
+            this.addOrbitToTracking(orbit);
 
             // Planet
             const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.a, 0, 0);
