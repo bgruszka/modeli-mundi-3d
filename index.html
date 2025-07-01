@@ -347,6 +347,15 @@
                 </div>
             </div>
 
+            <div class="control-group">
+                <label>⚡ Animation Speed</label>
+                <div class="slider-container">
+                    <input type="range" id="speed-slider" class="brightness-slider" 
+                           min="0" max="500" value="100">
+                    <span id="speed-value" class="brightness-value">100%</span>
+                </div>
+            </div>
+
             <div class="control-buttons">
                 <button id="pause-btn" class="control-btn">⏸️ Pause</button>
                 <button id="reset-btn" class="control-btn">🔄 Reset</button>
@@ -369,6 +378,16 @@
                 <button class="preset-btn" data-preset="dark">🌙 Dark</button>
                 <button class="preset-btn" data-preset="realistic">🌍 Realistic</button>
                 <button class="preset-btn" data-preset="dramatic">🎭 Dramatic</button>
+            </div>
+
+            <div class="control-group" style="margin-top: 15px;">
+                <label>🎬 Speed Presets</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-speed="25">🐌 Slow</button>
+                    <button class="preset-btn" data-speed="100">⚡ Normal</button>
+                    <button class="preset-btn" data-speed="200">🚀 Fast</button>
+                    <button class="preset-btn" data-speed="0">⏸️ Stop</button>
+                </div>
             </div>
         </div>
 

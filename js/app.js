@@ -13,6 +13,7 @@ class UniverseExplorer {
         this.animationFrame = null;
         this.celestialBodies = {};
         this.animationEnabled = true;
+        this.animationSpeed = 1.0; // Default speed multiplier
         this.time = 0;
         this.textureLoader = null;
         this.textures = {};
@@ -526,6 +527,17 @@ class UniverseExplorer {
             rimValue.textContent = `${Math.round(value * 100)}%`;
         });
 
+        // Animation speed slider
+        const speedSlider = document.getElementById('speed-slider');
+        const speedValue = document.getElementById('speed-value');
+        
+        speedSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value) / 100;
+            this.animationSpeed = value;
+            speedValue.textContent = `${Math.round(value * 100)}%`;
+            console.log(`Animation speed: ${Math.round(value * 100)}%`);
+        });
+
         // Animation pause/play button
         const pauseBtn = document.getElementById('pause-btn');
         pauseBtn.addEventListener('click', () => {
@@ -544,7 +556,15 @@ class UniverseExplorer {
         document.querySelectorAll('.preset-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const preset = e.target.dataset.preset;
-                this.applyLightingPreset(preset);
+                const speed = e.target.dataset.speed;
+                
+                if (preset) {
+                    this.applyLightingPreset(preset);
+                }
+                
+                if (speed !== undefined) {
+                    this.applySpeedPreset(parseInt(speed));
+                }
             });
         });
 
@@ -612,6 +632,25 @@ class UniverseExplorer {
     resetLighting() {
         const defaultSettings = { ambient: 0.4, sun: 2.0, rim: 0.3 };
         this.updateLightingFromSettings(defaultSettings);
+        
+        // Also reset animation speed
+        this.animationSpeed = 1.0;
+        document.getElementById('speed-slider').value = 100;
+        document.getElementById('speed-value').textContent = '100%';
+    }
+
+    /**
+     * Apply speed preset
+     */
+    applySpeedPreset(speedPercent) {
+        const speed = speedPercent / 100;
+        this.animationSpeed = speed;
+        
+        // Update UI
+        document.getElementById('speed-slider').value = speedPercent;
+        document.getElementById('speed-value').textContent = `${speedPercent}%`;
+        
+        console.log(`Speed preset applied: ${speedPercent}%`);
     }
 
     /**
@@ -1255,7 +1294,8 @@ class UniverseExplorer {
     animate() {
         this.animationFrame = requestAnimationFrame(() => this.animate());
         
-        this.time += 0.01;
+        // Apply animation speed multiplier
+        this.time += 0.01 * this.animationSpeed;
         this.updateAnimations();
         
         this.controls.update();
