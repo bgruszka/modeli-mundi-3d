@@ -656,20 +656,52 @@ class UniverseExplorer {
      * Toggle orbit visibility
      */
     toggleOrbitsVisibility() {
-        console.log(`Toggling ${this.visualElements.orbitObjects.length} orbit objects to ${this.visualElements.orbitsVisible}`);
+        console.log(`Toggling ${this.visualElements.orbitObjects.length} tracked orbit objects to ${this.visualElements.orbitsVisible}`);
+        
+        // Toggle tracked orbit objects
         this.visualElements.orbitObjects.forEach(orbit => {
             orbit.visible = this.visualElements.orbitsVisible;
         });
+        
+        // Also find and toggle any line objects that might be untracked orbits
+        let foundCount = 0;
+        this.scene.traverse((object) => {
+            if (object.type === 'Line' || object.type === 'LineSegments' || object.type === 'LineLoop') {
+                // Only toggle if it's not already tracked
+                if (!this.visualElements.orbitObjects.includes(object)) {
+                    object.visible = this.visualElements.orbitsVisible;
+                    foundCount++;
+                }
+            }
+        });
+        
+        console.log(`Also toggled ${foundCount} untracked line objects`);
     }
 
     /**
      * Toggle wireframe visibility
      */
     toggleWireframesVisibility() {
-        console.log(`Toggling ${this.visualElements.wireframeObjects.length} wireframe objects to ${this.visualElements.wireframesVisible}`);
+        console.log(`Toggling ${this.visualElements.wireframeObjects.length} tracked wireframe objects to ${this.visualElements.wireframesVisible}`);
+        
+        // Toggle tracked wireframe objects
         this.visualElements.wireframeObjects.forEach(wireframe => {
             wireframe.visible = this.visualElements.wireframesVisible;
         });
+        
+        // Also find and toggle any wireframe objects that might not be tracked
+        let foundCount = 0;
+        this.scene.traverse((object) => {
+            if (object.type === 'Mesh' && object.material) {
+                const material = Array.isArray(object.material) ? object.material[0] : object.material;
+                if (material.wireframe === true) {
+                    object.visible = this.visualElements.wireframesVisible;
+                    foundCount++;
+                }
+            }
+        });
+        
+        console.log(`Also toggled ${foundCount} untracked wireframe objects`);
     }
 
     /**
@@ -683,37 +715,38 @@ class UniverseExplorer {
     }
 
     /**
-     * Toggle debug mode to help identify what's causing the crossing lines
+     * Debug mode to identify scene objects (non-destructive)
      */
     toggleDebugMode() {
-        // Log all scene children to help debug
-        console.log('=== DEBUG: Scene Children ===');
+        console.log('=== DEBUG: Scene Analysis ===');
+        let wireframeCount = 0;
+        let lineCount = 0;
+        let meshCount = 0;
+        
         this.scene.traverse((object) => {
             if (object.type === 'Line' || object.type === 'LineSegments' || object.type === 'LineLoop') {
-                console.log('FOUND LINE OBJECT:', object.type, object.material, object.geometry);
-            } else if (object.material && object.material.wireframe) {
-                console.log('FOUND WIREFRAME OBJECT:', object.type, object.material.wireframe);
-            }
-        });
-        
-        // Try toggling renderer wireframe mode
-        this.scene.traverse((object) => {
-            if (object.material) {
-                if (Array.isArray(object.material)) {
-                    object.material.forEach(mat => {
-                        if (mat.wireframe !== undefined) {
-                            mat.wireframe = !mat.wireframe;
-                        }
-                    });
-                } else {
-                    if (object.material.wireframe !== undefined) {
-                        object.material.wireframe = !object.material.wireframe;
+                console.log('LINE OBJECT:', object.type, 'visible:', object.visible, object);
+                lineCount++;
+            } else if (object.type === 'Mesh') {
+                meshCount++;
+                if (object.material) {
+                    const material = Array.isArray(object.material) ? object.material[0] : object.material;
+                    if (material.wireframe) {
+                        console.log('WIREFRAME MESH:', object.type, 'visible:', object.visible, 'wireframe:', material.wireframe, object);
+                        wireframeCount++;
                     }
                 }
             }
         });
         
-        console.log('=== DEBUG: Toggled all wireframe modes ===');
+        console.log(`=== SUMMARY ===`);
+        console.log(`Wireframe objects: ${wireframeCount}`);
+        console.log(`Line objects: ${lineCount}`);
+        console.log(`Total mesh objects: ${meshCount}`);
+        console.log(`Tracked wireframe objects: ${this.visualElements.wireframeObjects.length}`);
+        console.log(`Tracked orbit objects: ${this.visualElements.orbitObjects.length}`);
+        console.log(`Wireframes visible setting: ${this.visualElements.wireframesVisible}`);
+        console.log(`Orbits visible setting: ${this.visualElements.orbitsVisible}`);
     }
 
     /**
