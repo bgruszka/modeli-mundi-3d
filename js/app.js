@@ -690,18 +690,19 @@ class UniverseExplorer {
         });
         
         // Also find and toggle any wireframe objects that might not be tracked
+        // BUT exclude objects that are already tracked as orbits
         let foundCount = 0;
         this.scene.traverse((object) => {
             if (object.type === 'Mesh' && object.material) {
                 const material = Array.isArray(object.material) ? object.material[0] : object.material;
-                if (material.wireframe === true) {
+                if (material.wireframe === true && !this.visualElements.orbitObjects.includes(object)) {
                     object.visible = this.visualElements.wireframesVisible;
                     foundCount++;
                 }
             }
         });
         
-        console.log(`Also toggled ${foundCount} untracked wireframe objects`);
+        console.log(`Also toggled ${foundCount} untracked wireframe objects (excluding orbits)`);
     }
 
     /**
@@ -935,7 +936,6 @@ class UniverseExplorer {
             orbit.rotation.x = Math.PI / 2;
             this.scene.add(orbit);
             this.addOrbitToTracking(orbit);
-            this.addWireframeToTracking(orbit); // Also count as geometry element
 
             // Planet
             const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.distance, 0, 0);
@@ -966,7 +966,6 @@ class UniverseExplorer {
                 epicycle.rotation.x = Math.PI / 2;
                 this.scene.add(epicycle);
                 this.addOrbitToTracking(epicycle);
-                this.addWireframeToTracking(epicycle); // Also count as geometry element
                 this.celestialBodies[planet.name.toLowerCase()].epicycle = epicycle;
             }
         });
@@ -1003,7 +1002,6 @@ class UniverseExplorer {
             orbit.rotation.x = Math.PI / 2;
             this.scene.add(orbit);
             this.addOrbitToTracking(orbit);
-            this.addWireframeToTracking(orbit); // Also count as geometry element
 
             // Planet
             const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.distance, 0, 0);
@@ -1058,7 +1056,6 @@ class UniverseExplorer {
             orbit.rotation.x = Math.PI / 2;
             this.scene.add(orbit);
             this.addOrbitToTracking(orbit);
-            this.addWireframeToTracking(orbit); // Also count as geometry element
 
             this.celestialBodies[moon.name.toLowerCase()] = {
                 object: moonBody,
@@ -1107,7 +1104,6 @@ class UniverseExplorer {
             const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
             this.scene.add(orbit);
             this.addOrbitToTracking(orbit);
-            this.addWireframeToTracking(orbit); // Also count as geometry element
 
             // Planet
             const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.a, 0, 0);

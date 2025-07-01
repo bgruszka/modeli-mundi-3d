@@ -33,8 +33,8 @@ An interactive web application that visualizes different historical models of th
 - **Animation Toggle**: Pause/play planetary motions with a single button
 - **Interactive Sliders**: Fine-tune each light source independently
 - **Visual Feedback**: Live percentage displays for all lighting values
-- **Orbit Toggle**: Hide/show orbital paths and rings for cleaner viewing
-- **Geometry Toggle**: Hide/show all geometric elements (orbits, wireframes, construction lines)
+- **Orbit Toggle**: Hide/show orbital paths, rings, and epicycles for cleaner viewing
+- **Geometry Toggle**: Hide/show wireframe spheres and construction elements (excludes orbits)
 
 ## Technology Stack
 
@@ -103,8 +103,8 @@ Simply open `index.html` in your web browser (may have limitations with some bro
 - **Pause/Play Button**: Stop or resume all animations
 - **Reset Button**: Return lighting to default values
 - **Preset Buttons**: Quick lighting scenarios for different viewing preferences
-- **Orbits Button**: Toggle visibility of all orbital paths and rings
-- **Geometry Button**: Toggle visibility of all geometric elements (wireframes, orbits, construction lines)
+- **Orbits Button**: Toggle visibility of orbital paths, rings, and epicycles
+- **Geometry Button**: Toggle visibility of wireframe spheres and construction elements (independent of orbits)
 
 ### Switching Models
 Click any of the model buttons in the left panel to switch between different historical representations of the universe.
