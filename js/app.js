@@ -137,20 +137,21 @@ class UniverseExplorer {
         this.textureLoader = new THREE.TextureLoader();
         
         // Define texture URLs for celestial bodies
-        // Using high-quality NASA textures and procedural alternatives
+        // Using reliable sources with equirectangular projections for sphere mapping
         const textureUrls = {
-            sun: 'https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg',
-            mercury: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg',
-            venus: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Venus_from_Mariner_10.jpg',
-            earth: 'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg',
-            mars: 'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
-            jupiter: 'https://upload.wikimedia.org/wikipedia/commons/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
-            saturn: 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg',
-            moon: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg',
-            io: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Io_highest_resolution_true_color.jpg',
-            europa: 'https://upload.wikimedia.org/wikipedia/commons/5/54/Europa-moon.jpg',
-            ganymede: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Ganymede_g1_true-edit1.jpg',
-            callisto: 'https://upload.wikimedia.org/wikipedia/commons/e/e9/Callisto.jpg'
+            sun: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/sun_1024.jpg',
+            mercury: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/mercury_1024.jpg',
+            venus: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/venus_1024.jpg',
+            earth: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg',
+            mars: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/mars_1024.jpg',
+            jupiter: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/jupiter_1024.jpg',
+            saturn: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/saturn_1024.jpg',
+            moon: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/moon_1024.jpg',
+            // Fallback to procedural for moons if Three.js doesn't have them
+            io: null,
+            europa: null,
+            ganymede: null,
+            callisto: null
         };
 
         // Track loading progress
@@ -159,27 +160,39 @@ class UniverseExplorer {
         
         // Load textures
         Object.entries(textureUrls).forEach(([name, url]) => {
-            this.textureLoader.load(
-                url,
-                (texture) => {
-                    texture.wrapS = THREE.RepeatWrapping;
-                    texture.wrapT = THREE.RepeatWrapping;
-                    this.textures[name] = texture;
-                    this.texturesLoaded++;
-                    this.updateTextureLoadingStatus();
-                    console.log(`✅ Loaded texture for ${name}`);
-                },
-                (progress) => {
-                    // Loading progress
-                },
-                (error) => {
-                    console.warn(`⚠️ Failed to load texture for ${name}, using fallback procedural texture`);
-                    // Create a fallback procedural texture
-                    this.textures[name] = this.createProceduralTexture(name);
-                    this.texturesLoaded++;
-                    this.updateTextureLoadingStatus();
-                }
-            );
+            if (url) {
+                this.textureLoader.load(
+                    url,
+                    (texture) => {
+                        // Proper sphere texture mapping
+                        texture.wrapS = THREE.ClampToEdgeWrapping;
+                        texture.wrapT = THREE.ClampToEdgeWrapping;
+                        texture.minFilter = THREE.LinearFilter;
+                        texture.magFilter = THREE.LinearFilter;
+                        texture.flipY = false; // Important for proper sphere mapping
+                        this.textures[name] = texture;
+                        this.texturesLoaded++;
+                        this.updateTextureLoadingStatus();
+                        console.log(`✅ Loaded texture for ${name}`);
+                    },
+                    (progress) => {
+                        // Loading progress
+                    },
+                    (error) => {
+                        console.warn(`⚠️ Failed to load texture for ${name}, using fallback procedural texture`);
+                        // Create a fallback procedural texture
+                        this.textures[name] = this.createProceduralTexture(name);
+                        this.texturesLoaded++;
+                        this.updateTextureLoadingStatus();
+                    }
+                );
+            } else {
+                // Use procedural texture immediately for null URLs
+                this.textures[name] = this.createProceduralTexture(name);
+                this.texturesLoaded++;
+                this.updateTextureLoadingStatus();
+                console.log(`🎨 Using procedural texture for ${name}`);
+            }
         });
 
         // Create immediate fallback textures
@@ -195,8 +208,8 @@ class UniverseExplorer {
      */
     createProceduralTexture(bodyName) {
         const canvas = document.createElement('canvas');
-        canvas.width = 512;
-        canvas.height = 512;
+        canvas.width = 1024;
+        canvas.height = 512; // 2:1 aspect ratio for equirectangular mapping
         const context = canvas.getContext('2d');
 
         // Color schemes for different celestial bodies
@@ -218,18 +231,21 @@ class UniverseExplorer {
         const scheme = colorSchemes[bodyName] || colorSchemes.mercury;
         
         // Create gradient background
-        const gradient = context.createRadialGradient(256, 256, 0, 256, 256, 256);
+        const gradient = context.createRadialGradient(512, 256, 0, 512, 256, 512);
         gradient.addColorStop(0, scheme.primary);
         gradient.addColorStop(1, scheme.secondary);
         context.fillStyle = gradient;
-        context.fillRect(0, 0, 512, 512);
+        context.fillRect(0, 0, 1024, 512);
 
         // Add pattern based on body type
         this.addTexturePattern(context, scheme.pattern, scheme);
 
         const texture = new THREE.CanvasTexture(canvas);
-        texture.wrapS = THREE.RepeatWrapping;
-        texture.wrapT = THREE.RepeatWrapping;
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.minFilter = THREE.LinearFilter;
+        texture.magFilter = THREE.LinearFilter;
+        texture.flipY = false;
         return texture;
     }
 
@@ -243,7 +259,7 @@ class UniverseExplorer {
             case 'solar':
                 // Solar flares and spots
                 for (let i = 0; i < 20; i++) {
-                    const x = Math.random() * 512;
+                    const x = Math.random() * 1024;
                     const y = Math.random() * 512;
                     const radius = Math.random() * 30 + 10;
                     const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
@@ -261,7 +277,7 @@ class UniverseExplorer {
                 context.fillStyle = '#228B22';
                 for (let i = 0; i < 15; i++) {
                     context.beginPath();
-                    const x = Math.random() * 512;
+                    const x = Math.random() * 1024;
                     const y = Math.random() * 512;
                     const width = Math.random() * 100 + 50;
                     const height = Math.random() * 60 + 30;
@@ -277,7 +293,7 @@ class UniverseExplorer {
                 for (let y = 0; y < 512; y += 40) {
                     context.beginPath();
                     context.moveTo(0, y + Math.sin(y * 0.1) * 10);
-                    for (let x = 0; x <= 512; x += 10) {
+                    for (let x = 0; x <= 1024; x += 10) {
                         context.lineTo(x, y + Math.sin((x + y) * 0.05) * 15);
                     }
                     context.stroke();
@@ -287,7 +303,7 @@ class UniverseExplorer {
             case 'rocky':
                 // Craters and surface features
                 for (let i = 0; i < 30; i++) {
-                    const x = Math.random() * 512;
+                    const x = Math.random() * 1024;
                     const y = Math.random() * 512;
                     const radius = Math.random() * 20 + 5;
                     context.fillStyle = scheme.secondary;
@@ -304,7 +320,7 @@ class UniverseExplorer {
             case 'cloudy':
                 // Cloud patterns
                 for (let i = 0; i < 25; i++) {
-                    const x = Math.random() * 512;
+                    const x = Math.random() * 1024;
                     const y = Math.random() * 512;
                     const radius = Math.random() * 40 + 20;
                     context.fillStyle = '#FFFFFF';
@@ -319,7 +335,7 @@ class UniverseExplorer {
                 // Volcanic features
                 context.fillStyle = '#FF4500';
                 for (let i = 0; i < 20; i++) {
-                    const x = Math.random() * 512;
+                    const x = Math.random() * 1024;
                     const y = Math.random() * 512;
                     const radius = Math.random() * 15 + 5;
                     context.beginPath();
@@ -334,7 +350,7 @@ class UniverseExplorer {
                 context.lineWidth = 2;
                 for (let i = 0; i < 40; i++) {
                     context.beginPath();
-                    const startX = Math.random() * 512;
+                    const startX = Math.random() * 1024;
                     const startY = Math.random() * 512;
                     context.moveTo(startX, startY);
                     context.lineTo(startX + (Math.random() - 0.5) * 100, startY + (Math.random() - 0.5) * 100);
@@ -779,7 +795,8 @@ class UniverseExplorer {
      * Create a celestial body (planet, moon, sun)
      */
     createCelestialBody(name, size, color, x, y, z) {
-        const geometry = new THREE.SphereGeometry(size, 64, 64); // Higher resolution for better texture display
+        // Create sphere with proper UV mapping for textures
+        const geometry = new THREE.SphereGeometry(size, 64, 32, 0, Math.PI * 2, 0, Math.PI);
         
         // Get texture for this celestial body
         const bodyKey = name.toLowerCase();
