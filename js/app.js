@@ -77,6 +77,9 @@ class UniverseExplorer {
         this.loadModel(this.currentModel);
         this.animate();
         
+        // Initialize button states
+        this.updateButtonStates();
+        
         // Hide loading screen
         document.getElementById('loading').style.display = 'none';
     }
@@ -158,21 +161,21 @@ class UniverseExplorer {
         this.textureLoader = new THREE.TextureLoader();
         
         // Define texture URLs for celestial bodies
-        // Using reliable sources with equirectangular projections for sphere mapping
+        // Using procedural textures for now (all set to null to use fallbacks)
+        // This ensures consistent behavior and eliminates 404 errors
         const textureUrls = {
-            sun: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/sun_1024.jpg',
-            mercury: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/mercury_1024.jpg',
-            venus: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/venus_1024.jpg',
-            earth: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/earth_atmos_2048.jpg',
-            mars: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/mars_1024.jpg',
-            jupiter: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/jupiter_1024.jpg',
-            saturn: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/saturn_1024.jpg',
-            moon: 'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r128/examples/textures/planets/moon_1024.jpg',
-            // Fallback to procedural for moons if Three.js doesn't have them
-            io: null,
-            europa: null,
-            ganymede: null,
-            callisto: null
+            sun: null,      // Will use procedural solar texture
+            mercury: null,  // Will use procedural rocky texture
+            venus: null,    // Will use procedural cloudy texture
+            earth: null,    // Will use procedural earth texture
+            mars: null,     // Will use procedural rocky texture
+            jupiter: null,  // Will use procedural gas giant texture
+            saturn: null,   // Will use procedural gas giant texture
+            moon: null,     // Will use procedural rocky texture
+            io: null,       // Will use procedural volcanic texture
+            europa: null,   // Will use procedural icy texture
+            ganymede: null, // Will use procedural rocky texture
+            callisto: null  // Will use procedural rocky texture
         };
 
         // Track loading progress
@@ -546,6 +549,7 @@ class UniverseExplorer {
             this.visualElements.orbitsVisible = !this.visualElements.orbitsVisible;
             this.toggleOrbitsVisibility();
             orbitsBtn.classList.toggle('active', !this.visualElements.orbitsVisible);
+            console.log(`Orbits visibility: ${this.visualElements.orbitsVisible}`);
         });
 
         const wireframesBtn = document.getElementById('wireframes-btn');
@@ -553,6 +557,7 @@ class UniverseExplorer {
             this.visualElements.wireframesVisible = !this.visualElements.wireframesVisible;
             this.toggleWireframesVisibility();
             wireframesBtn.classList.toggle('active', !this.visualElements.wireframesVisible);
+            console.log(`Wireframes visibility: ${this.visualElements.wireframesVisible}`);
         });
     }
 
@@ -613,9 +618,26 @@ class UniverseExplorer {
     }
 
     /**
+     * Update button states to reflect current settings
+     */
+    updateButtonStates() {
+        const orbitsBtn = document.getElementById('orbits-btn');
+        const wireframesBtn = document.getElementById('wireframes-btn');
+        
+        if (orbitsBtn) {
+            orbitsBtn.classList.toggle('active', !this.visualElements.orbitsVisible);
+        }
+        
+        if (wireframesBtn) {
+            wireframesBtn.classList.toggle('active', !this.visualElements.wireframesVisible);
+        }
+    }
+
+    /**
      * Toggle orbit visibility
      */
     toggleOrbitsVisibility() {
+        console.log(`Toggling ${this.visualElements.orbitObjects.length} orbit objects to ${this.visualElements.orbitsVisible}`);
         this.visualElements.orbitObjects.forEach(orbit => {
             orbit.visible = this.visualElements.orbitsVisible;
         });
@@ -625,6 +647,7 @@ class UniverseExplorer {
      * Toggle wireframe visibility
      */
     toggleWireframesVisibility() {
+        console.log(`Toggling ${this.visualElements.wireframeObjects.length} wireframe objects to ${this.visualElements.wireframesVisible}`);
         this.visualElements.wireframeObjects.forEach(wireframe => {
             wireframe.visible = this.visualElements.wireframesVisible;
         });
@@ -644,6 +667,14 @@ class UniverseExplorer {
     addWireframeToTracking(wireframeObject) {
         this.visualElements.wireframeObjects.push(wireframeObject);
         wireframeObject.visible = this.visualElements.wireframesVisible;
+    }
+
+    /**
+     * Apply current visual element states to all tracked objects
+     */
+    updateVisualElementStates() {
+        this.toggleOrbitsVisibility();
+        this.toggleWireframesVisibility();
     }
 
     /**
@@ -719,6 +750,9 @@ class UniverseExplorer {
                 this.createKeplerModel();
                 break;
         }
+
+        // Apply current visual element toggle states to the new model
+        this.updateVisualElementStates();
     }
 
     /**
