@@ -34,8 +34,10 @@ class UniverseExplorer {
         this.visualElements = {
             orbitsVisible: true,
             wireframesVisible: true,
+            starsVisible: true,
             orbitObjects: [],
-            wireframeObjects: []
+            wireframeObjects: [],
+            starField: null
         };
         
         // Model descriptions
@@ -458,6 +460,9 @@ class UniverseExplorer {
         
         const stars = new THREE.Points(starGeometry, starMaterial);
         this.scene.add(stars);
+        
+        // Store reference to star field for potential toggling
+        this.visualElements.starField = stars;
     }
 
     /**
@@ -559,6 +564,20 @@ class UniverseExplorer {
             wireframesBtn.classList.toggle('active', !this.visualElements.wireframesVisible);
             console.log(`Geometry/Wireframes visibility: ${this.visualElements.wireframesVisible}`);
         });
+
+        const starsBtn = document.getElementById('stars-btn');
+        starsBtn.addEventListener('click', () => {
+            this.visualElements.starsVisible = !this.visualElements.starsVisible;
+            this.toggleStarsVisibility();
+            starsBtn.classList.toggle('active', !this.visualElements.starsVisible);
+            console.log(`Stars visibility: ${this.visualElements.starsVisible}`);
+        });
+
+        const debugBtn = document.getElementById('debug-btn');
+        debugBtn.addEventListener('click', () => {
+            this.toggleDebugMode();
+            debugBtn.classList.toggle('active');
+        });
     }
 
     /**
@@ -651,6 +670,50 @@ class UniverseExplorer {
         this.visualElements.wireframeObjects.forEach(wireframe => {
             wireframe.visible = this.visualElements.wireframesVisible;
         });
+    }
+
+    /**
+     * Toggle star field visibility
+     */
+    toggleStarsVisibility() {
+        if (this.visualElements.starField) {
+            this.visualElements.starField.visible = this.visualElements.starsVisible;
+            console.log(`Star field visibility: ${this.visualElements.starsVisible}`);
+        }
+    }
+
+    /**
+     * Toggle debug mode to help identify what's causing the crossing lines
+     */
+    toggleDebugMode() {
+        // Log all scene children to help debug
+        console.log('=== DEBUG: Scene Children ===');
+        this.scene.traverse((object) => {
+            if (object.type === 'Line' || object.type === 'LineSegments' || object.type === 'LineLoop') {
+                console.log('FOUND LINE OBJECT:', object.type, object.material, object.geometry);
+            } else if (object.material && object.material.wireframe) {
+                console.log('FOUND WIREFRAME OBJECT:', object.type, object.material.wireframe);
+            }
+        });
+        
+        // Try toggling renderer wireframe mode
+        this.scene.traverse((object) => {
+            if (object.material) {
+                if (Array.isArray(object.material)) {
+                    object.material.forEach(mat => {
+                        if (mat.wireframe !== undefined) {
+                            mat.wireframe = !mat.wireframe;
+                        }
+                    });
+                } else {
+                    if (object.material.wireframe !== undefined) {
+                        object.material.wireframe = !object.material.wireframe;
+                    }
+                }
+            }
+        });
+        
+        console.log('=== DEBUG: Toggled all wireframe modes ===');
     }
 
     /**
