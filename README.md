@@ -14,6 +14,7 @@ An interactive web application that visualizes different historical models of th
 ### 🎮 Interactive Features
 - **3D Navigation**: Rotate, zoom, and pan around each cosmic model
 - **Real-time Animations**: Watch planets and celestial bodies move according to each model
+- **Animation Controls**: Pause/play animations with dedicated controls
 - **Educational Information**: Detailed descriptions of each historical model
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
 
@@ -25,6 +26,13 @@ An interactive web application that visualizes different historical models of th
 - **Advanced Lighting**: Atmospheric rim lighting and realistic shadows
 - **Planetary Rotation**: Each celestial body rotates at its own realistic speed
 - **Modern UI**: Glassmorphic design with texture loading progress indicators
+
+### 🎛️ Lighting & Animation Controls
+- **Dynamic Lighting**: Real-time adjustment of ambient, sun, and rim lighting
+- **Brightness Presets**: One-click lighting scenarios (Bright, Dark, Realistic, Dramatic)
+- **Animation Toggle**: Pause/play planetary motions with a single button
+- **Interactive Sliders**: Fine-tune each light source independently
+- **Visual Feedback**: Live percentage displays for all lighting values
 
 ## Technology Stack
 
@@ -84,6 +92,15 @@ Simply open `index.html` in your web browser (may have limitations with some bro
 - **Mouse Wheel**: Zoom in and out
 - **Right-click + Drag**: Pan the view
 - **Touch Devices**: Pinch to zoom, swipe to rotate
+
+### Lighting Controls
+- **Scene Controls Panel**: Located in the top-right corner
+- **Ambient Light Slider**: Adjust overall scene brightness (0-100%)
+- **Sun Intensity Slider**: Control the main light source power (0-300%)
+- **Rim Light Slider**: Fine-tune edge lighting for planet definition (0-100%)
+- **Pause/Play Button**: Stop or resume all animations
+- **Reset Button**: Return lighting to default values
+- **Preset Buttons**: Quick lighting scenarios for different viewing preferences
 
 ### Switching Models
 Click any of the model buttons in the left panel to switch between different historical representations of the universe.

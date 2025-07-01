@@ -111,6 +111,128 @@
             max-width: 200px;
         }
 
+        #lighting-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 250px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        #lighting-controls h3 {
+            color: #ffd700;
+            margin: 0 0 15px 0;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #87ceeb;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brightness-slider {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .brightness-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .brightness-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .brightness-value {
+            color: #ffd700;
+            font-size: 0.8em;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .control-btn {
+            flex: 1;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #2a5298, #3d6bb3);
+            transform: translateY(-1px);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75em;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
         #loading {
             position: absolute;
             top: 50%;
@@ -127,6 +249,27 @@
                 top: 10px;
                 left: 10px;
                 padding: 15px;
+            }
+
+            #lighting-controls {
+                top: 10px;
+                right: 10px;
+                min-width: 200px;
+                padding: 12px;
+            }
+
+            #lighting-controls h3 {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+
+            .control-group {
+                margin-bottom: 12px;
+            }
+
+            .control-btn {
+                padding: 6px 8px;
+                font-size: 0.75em;
             }
 
             #controls-info {
@@ -171,6 +314,49 @@
                 <h4>Aristotle's Geocentric Model</h4>
                 <p>The earliest systematic model where Earth sits at the center of the universe, surrounded by concentric crystalline spheres carrying the celestial bodies. The outermost sphere contains the fixed stars.</p>
                 <p><em>✨ Enhanced with realistic planet textures and atmospheric lighting effects!</em></p>
+            </div>
+        </div>
+
+        <div id="lighting-controls">
+            <h3>🎛️ Scene Controls</h3>
+            
+            <div class="control-group">
+                <label>🌞 Ambient Light</label>
+                <div class="slider-container">
+                    <input type="range" id="ambient-slider" class="brightness-slider" 
+                           min="0" max="100" value="40">
+                    <span id="ambient-value" class="brightness-value">40%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>💡 Sun Intensity</label>
+                <div class="slider-container">
+                    <input type="range" id="sun-slider" class="brightness-slider" 
+                           min="0" max="300" value="200">
+                    <span id="sun-value" class="brightness-value">200%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>✨ Rim Light</label>
+                <div class="slider-container">
+                    <input type="range" id="rim-slider" class="brightness-slider" 
+                           min="0" max="100" value="30">
+                    <span id="rim-value" class="brightness-value">30%</span>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button id="pause-btn" class="control-btn">⏸️ Pause</button>
+                <button id="reset-btn" class="control-btn">🔄 Reset</button>
+            </div>
+
+            <div class="preset-buttons">
+                <button class="preset-btn" data-preset="bright">☀️ Bright</button>
+                <button class="preset-btn" data-preset="dark">🌙 Dark</button>
+                <button class="preset-btn" data-preset="realistic">🌍 Realistic</button>
+                <button class="preset-btn" data-preset="dramatic">🎭 Dramatic</button>
             </div>
         </div>
 

@@ -17,6 +17,19 @@ class UniverseExplorer {
         this.textureLoader = null;
         this.textures = {};
         
+        // Lighting control properties
+        this.lights = {
+            ambient: null,
+            sun: null,
+            rim1: null,
+            rim2: null
+        };
+        this.lightingSettings = {
+            ambient: 0.4,
+            sun: 2.0,
+            rim: 0.3
+        };
+        
         // Model descriptions
         this.modelInfo = {
             aristotle: {
@@ -93,30 +106,30 @@ class UniverseExplorer {
      */
     setupLights() {
         // Ambient light for overall illumination
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
-        this.scene.add(ambientLight);
+        this.lights.ambient = new THREE.AmbientLight(0x404040, this.lightingSettings.ambient);
+        this.scene.add(this.lights.ambient);
 
         // Main sun light (point light)
-        const sunLight = new THREE.PointLight(0xFFE4B5, 2.0, 1000);
-        sunLight.position.set(0, 0, 0);
-        sunLight.castShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        sunLight.shadow.camera.near = 0.1;
-        sunLight.shadow.camera.far = 1000;
-        this.scene.add(sunLight);
+        this.lights.sun = new THREE.PointLight(0xFFE4B5, this.lightingSettings.sun, 1000);
+        this.lights.sun.position.set(0, 0, 0);
+        this.lights.sun.castShadow = true;
+        this.lights.sun.shadow.mapSize.width = 2048;
+        this.lights.sun.shadow.mapSize.height = 2048;
+        this.lights.sun.shadow.camera.near = 0.1;
+        this.lights.sun.shadow.camera.far = 1000;
+        this.scene.add(this.lights.sun);
 
         // Rim lighting for better planet definition
-        const rimLight1 = new THREE.DirectionalLight(0x87CEEB, 0.3);
-        rimLight1.position.set(100, 50, 100);
-        this.scene.add(rimLight1);
+        this.lights.rim1 = new THREE.DirectionalLight(0x87CEEB, this.lightingSettings.rim);
+        this.lights.rim1.position.set(100, 50, 100);
+        this.scene.add(this.lights.rim1);
         
-        const rimLight2 = new THREE.DirectionalLight(0x4169E1, 0.2);
-        rimLight2.position.set(-100, -50, -100);
-        this.scene.add(rimLight2);
+        this.lights.rim2 = new THREE.DirectionalLight(0x4169E1, this.lightingSettings.rim * 0.7);
+        this.lights.rim2.position.set(-100, -50, -100);
+        this.scene.add(this.lights.rim2);
 
-        // Store reference to sun light for model-specific adjustments
-        this.sunLight = sunLight;
+        // Store reference to sun light for model-specific adjustments (backward compatibility)
+        this.sunLight = this.lights.sun;
     }
 
     /**
@@ -448,12 +461,132 @@ class UniverseExplorer {
             });
         });
 
+        // Lighting control sliders
+        this.setupLightingControls();
+
         // Window resize
         window.addEventListener('resize', () => {
             this.camera.aspect = window.innerWidth / window.innerHeight;
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
+    }
+
+    /**
+     * Set up lighting control sliders and buttons
+     */
+    setupLightingControls() {
+        // Ambient light slider
+        const ambientSlider = document.getElementById('ambient-slider');
+        const ambientValue = document.getElementById('ambient-value');
+        
+        ambientSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value) / 100;
+            this.lightingSettings.ambient = value;
+            this.lights.ambient.intensity = value;
+            ambientValue.textContent = `${Math.round(value * 100)}%`;
+        });
+
+        // Sun light slider
+        const sunSlider = document.getElementById('sun-slider');
+        const sunValue = document.getElementById('sun-value');
+        
+        sunSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value) / 100;
+            this.lightingSettings.sun = value;
+            this.lights.sun.intensity = value;
+            sunValue.textContent = `${Math.round(value * 100)}%`;
+        });
+
+        // Rim light slider
+        const rimSlider = document.getElementById('rim-slider');
+        const rimValue = document.getElementById('rim-value');
+        
+        rimSlider.addEventListener('input', (e) => {
+            const value = parseFloat(e.target.value) / 100;
+            this.lightingSettings.rim = value;
+            this.lights.rim1.intensity = value;
+            this.lights.rim2.intensity = value * 0.7;
+            rimValue.textContent = `${Math.round(value * 100)}%`;
+        });
+
+        // Animation pause/play button
+        const pauseBtn = document.getElementById('pause-btn');
+        pauseBtn.addEventListener('click', () => {
+            this.animationEnabled = !this.animationEnabled;
+            pauseBtn.textContent = this.animationEnabled ? '⏸️ Pause' : '▶️ Play';
+            pauseBtn.classList.toggle('active', !this.animationEnabled);
+        });
+
+        // Reset button
+        const resetBtn = document.getElementById('reset-btn');
+        resetBtn.addEventListener('click', () => {
+            this.resetLighting();
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const preset = e.target.dataset.preset;
+                this.applyLightingPreset(preset);
+            });
+        });
+    }
+
+    /**
+     * Apply lighting presets
+     */
+    applyLightingPreset(preset) {
+        let settings;
+        
+        switch (preset) {
+            case 'bright':
+                settings = { ambient: 0.8, sun: 2.5, rim: 0.5 };
+                break;
+            case 'dark':
+                settings = { ambient: 0.1, sun: 1.0, rim: 0.1 };
+                break;
+            case 'realistic':
+                settings = { ambient: 0.3, sun: 1.8, rim: 0.2 };
+                break;
+            case 'dramatic':
+                settings = { ambient: 0.2, sun: 3.0, rim: 0.8 };
+                break;
+            default:
+                return;
+        }
+
+        this.updateLightingFromSettings(settings);
+    }
+
+    /**
+     * Reset lighting to default values
+     */
+    resetLighting() {
+        const defaultSettings = { ambient: 0.4, sun: 2.0, rim: 0.3 };
+        this.updateLightingFromSettings(defaultSettings);
+    }
+
+    /**
+     * Update lighting and UI from settings object
+     */
+    updateLightingFromSettings(settings) {
+        // Update lighting
+        this.lightingSettings = { ...settings };
+        this.lights.ambient.intensity = settings.ambient;
+        this.lights.sun.intensity = settings.sun;
+        this.lights.rim1.intensity = settings.rim;
+        this.lights.rim2.intensity = settings.rim * 0.7;
+
+        // Update UI sliders
+        document.getElementById('ambient-slider').value = Math.round(settings.ambient * 100);
+        document.getElementById('ambient-value').textContent = `${Math.round(settings.ambient * 100)}%`;
+        
+        document.getElementById('sun-slider').value = Math.round(settings.sun * 100);
+        document.getElementById('sun-value').textContent = `${Math.round(settings.sun * 100)}%`;
+        
+        document.getElementById('rim-slider').value = Math.round(settings.rim * 100);
+        document.getElementById('rim-value').textContent = `${Math.round(settings.rim * 100)}%`;
     }
 
     /**
