@@ -14,6 +14,8 @@ class UniverseExplorer {
         this.celestialBodies = {};
         this.animationEnabled = true;
         this.time = 0;
+        this.textureLoader = null;
+        this.textures = {};
         
         // Model descriptions
         this.modelInfo = {
@@ -49,6 +51,7 @@ class UniverseExplorer {
         this.setupScene();
         this.setupLights();
         this.setupControls();
+        this.setupTextures();
         this.setupEventListeners();
         this.loadModel(this.currentModel);
         this.animate();
@@ -89,22 +92,31 @@ class UniverseExplorer {
      * Set up lighting for the scene
      */
     setupLights() {
-        // Ambient light
-        const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+        // Ambient light for overall illumination
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
         this.scene.add(ambientLight);
 
-        // Point light (Sun)
-        const sunLight = new THREE.PointLight(0xffffff, 1.5, 1000);
+        // Main sun light (point light)
+        const sunLight = new THREE.PointLight(0xFFE4B5, 2.0, 1000);
         sunLight.position.set(0, 0, 0);
         sunLight.castShadow = true;
         sunLight.shadow.mapSize.width = 2048;
         sunLight.shadow.mapSize.height = 2048;
+        sunLight.shadow.camera.near = 0.1;
+        sunLight.shadow.camera.far = 1000;
         this.scene.add(sunLight);
 
-        // Directional light for better visibility
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        directionalLight.position.set(50, 50, 50);
-        this.scene.add(directionalLight);
+        // Rim lighting for better planet definition
+        const rimLight1 = new THREE.DirectionalLight(0x87CEEB, 0.3);
+        rimLight1.position.set(100, 50, 100);
+        this.scene.add(rimLight1);
+        
+        const rimLight2 = new THREE.DirectionalLight(0x4169E1, 0.2);
+        rimLight2.position.set(-100, -50, -100);
+        this.scene.add(rimLight2);
+
+        // Store reference to sun light for model-specific adjustments
+        this.sunLight = sunLight;
     }
 
     /**
@@ -119,26 +131,291 @@ class UniverseExplorer {
     }
 
     /**
+     * Set up textures for celestial bodies
+     */
+    setupTextures() {
+        this.textureLoader = new THREE.TextureLoader();
+        
+        // Define texture URLs for celestial bodies
+        // Using high-quality NASA textures and procedural alternatives
+        const textureUrls = {
+            sun: 'https://upload.wikimedia.org/wikipedia/commons/b/b4/The_Sun_by_the_Atmospheric_Imaging_Assembly_of_NASA%27s_Solar_Dynamics_Observatory_-_20100819.jpg',
+            mercury: 'https://upload.wikimedia.org/wikipedia/commons/4/4a/Mercury_in_true_color.jpg',
+            venus: 'https://upload.wikimedia.org/wikipedia/commons/0/08/Venus_from_Mariner_10.jpg',
+            earth: 'https://upload.wikimedia.org/wikipedia/commons/9/97/The_Earth_seen_from_Apollo_17.jpg',
+            mars: 'https://upload.wikimedia.org/wikipedia/commons/0/02/OSIRIS_Mars_true_color.jpg',
+            jupiter: 'https://upload.wikimedia.org/wikipedia/commons/2/2b/Jupiter_and_its_shrunken_Great_Red_Spot.jpg',
+            saturn: 'https://upload.wikimedia.org/wikipedia/commons/c/c7/Saturn_during_Equinox.jpg',
+            moon: 'https://upload.wikimedia.org/wikipedia/commons/e/e1/FullMoon2010.jpg',
+            io: 'https://upload.wikimedia.org/wikipedia/commons/7/7b/Io_highest_resolution_true_color.jpg',
+            europa: 'https://upload.wikimedia.org/wikipedia/commons/5/54/Europa-moon.jpg',
+            ganymede: 'https://upload.wikimedia.org/wikipedia/commons/f/f2/Ganymede_g1_true-edit1.jpg',
+            callisto: 'https://upload.wikimedia.org/wikipedia/commons/e/e9/Callisto.jpg'
+        };
+
+        // Track loading progress
+        this.texturesLoaded = 0;
+        this.totalTextures = Object.keys(textureUrls).length;
+        
+        // Load textures
+        Object.entries(textureUrls).forEach(([name, url]) => {
+            this.textureLoader.load(
+                url,
+                (texture) => {
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.RepeatWrapping;
+                    this.textures[name] = texture;
+                    this.texturesLoaded++;
+                    this.updateTextureLoadingStatus();
+                    console.log(`✅ Loaded texture for ${name}`);
+                },
+                (progress) => {
+                    // Loading progress
+                },
+                (error) => {
+                    console.warn(`⚠️ Failed to load texture for ${name}, using fallback procedural texture`);
+                    // Create a fallback procedural texture
+                    this.textures[name] = this.createProceduralTexture(name);
+                    this.texturesLoaded++;
+                    this.updateTextureLoadingStatus();
+                }
+            );
+        });
+
+        // Create immediate fallback textures
+        Object.keys(textureUrls).forEach(name => {
+            if (!this.textures[name]) {
+                this.textures[name] = this.createProceduralTexture(name);
+            }
+        });
+    }
+
+    /**
+     * Create procedural textures as fallbacks
+     */
+    createProceduralTexture(bodyName) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const context = canvas.getContext('2d');
+
+        // Color schemes for different celestial bodies
+        const colorSchemes = {
+            sun: { primary: '#FDB813', secondary: '#FF8C00', pattern: 'solar' },
+            mercury: { primary: '#8C7853', secondary: '#A68B5B', pattern: 'rocky' },
+            venus: { primary: '#FFC649', secondary: '#FFB347', pattern: 'cloudy' },
+            earth: { primary: '#4A90E2', secondary: '#228B22', pattern: 'earth' },
+            mars: { primary: '#CD5C5C', secondary: '#8B4513', pattern: 'rocky' },
+            jupiter: { primary: '#D2691E', secondary: '#F4A460', pattern: 'gas' },
+            saturn: { primary: '#FAD5A5', secondary: '#DEB887', pattern: 'gas' },
+            moon: { primary: '#C0C0C0', secondary: '#808080', pattern: 'rocky' },
+            io: { primary: '#FFFF99', secondary: '#FFA500', pattern: 'volcanic' },
+            europa: { primary: '#87CEEB', secondary: '#4682B4', pattern: 'icy' },
+            ganymede: { primary: '#8B7D6B', secondary: '#696969', pattern: 'rocky' },
+            callisto: { primary: '#696969', secondary: '#2F4F4F', pattern: 'rocky' }
+        };
+
+        const scheme = colorSchemes[bodyName] || colorSchemes.mercury;
+        
+        // Create gradient background
+        const gradient = context.createRadialGradient(256, 256, 0, 256, 256, 256);
+        gradient.addColorStop(0, scheme.primary);
+        gradient.addColorStop(1, scheme.secondary);
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 512, 512);
+
+        // Add pattern based on body type
+        this.addTexturePattern(context, scheme.pattern, scheme);
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        return texture;
+    }
+
+    /**
+     * Add specific patterns to procedural textures
+     */
+    addTexturePattern(context, pattern, scheme) {
+        context.globalAlpha = 0.3;
+        
+        switch (pattern) {
+            case 'solar':
+                // Solar flares and spots
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    const radius = Math.random() * 30 + 10;
+                    const gradient = context.createRadialGradient(x, y, 0, x, y, radius);
+                    gradient.addColorStop(0, '#FFD700');
+                    gradient.addColorStop(1, 'transparent');
+                    context.fillStyle = gradient;
+                    context.beginPath();
+                    context.arc(x, y, radius, 0, Math.PI * 2);
+                    context.fill();
+                }
+                break;
+                
+            case 'earth':
+                // Continents and oceans
+                context.fillStyle = '#228B22';
+                for (let i = 0; i < 15; i++) {
+                    context.beginPath();
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    const width = Math.random() * 100 + 50;
+                    const height = Math.random() * 60 + 30;
+                    context.ellipse(x, y, width, height, Math.random() * Math.PI, 0, Math.PI * 2);
+                    context.fill();
+                }
+                break;
+                
+            case 'gas':
+                // Gas giant bands
+                context.strokeStyle = scheme.secondary;
+                context.lineWidth = 8;
+                for (let y = 0; y < 512; y += 40) {
+                    context.beginPath();
+                    context.moveTo(0, y + Math.sin(y * 0.1) * 10);
+                    for (let x = 0; x <= 512; x += 10) {
+                        context.lineTo(x, y + Math.sin((x + y) * 0.05) * 15);
+                    }
+                    context.stroke();
+                }
+                break;
+                
+            case 'rocky':
+                // Craters and surface features
+                for (let i = 0; i < 30; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    const radius = Math.random() * 20 + 5;
+                    context.fillStyle = scheme.secondary;
+                    context.beginPath();
+                    context.arc(x, y, radius, 0, Math.PI * 2);
+                    context.fill();
+                    context.fillStyle = scheme.primary;
+                    context.beginPath();
+                    context.arc(x - 2, y - 2, radius * 0.8, 0, Math.PI * 2);
+                    context.fill();
+                }
+                break;
+                
+            case 'cloudy':
+                // Cloud patterns
+                for (let i = 0; i < 25; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    const radius = Math.random() * 40 + 20;
+                    context.fillStyle = '#FFFFFF';
+                    context.globalAlpha = 0.2;
+                    context.beginPath();
+                    context.arc(x, y, radius, 0, Math.PI * 2);
+                    context.fill();
+                }
+                break;
+                
+            case 'volcanic':
+                // Volcanic features
+                context.fillStyle = '#FF4500';
+                for (let i = 0; i < 20; i++) {
+                    const x = Math.random() * 512;
+                    const y = Math.random() * 512;
+                    const radius = Math.random() * 15 + 5;
+                    context.beginPath();
+                    context.arc(x, y, radius, 0, Math.PI * 2);
+                    context.fill();
+                }
+                break;
+                
+            case 'icy':
+                // Ice cracks and features
+                context.strokeStyle = '#FFFFFF';
+                context.lineWidth = 2;
+                for (let i = 0; i < 40; i++) {
+                    context.beginPath();
+                    const startX = Math.random() * 512;
+                    const startY = Math.random() * 512;
+                    context.moveTo(startX, startY);
+                    context.lineTo(startX + (Math.random() - 0.5) * 100, startY + (Math.random() - 0.5) * 100);
+                    context.stroke();
+                }
+                break;
+        }
+        
+        context.globalAlpha = 1.0;
+    }
+
+    /**
+     * Update texture loading status
+     */
+    updateTextureLoadingStatus() {
+        const statusElement = document.getElementById('texture-status');
+        if (statusElement) {
+            const percentage = Math.round((this.texturesLoaded / this.totalTextures) * 100);
+            statusElement.textContent = `Loading textures... ${percentage}% (${this.texturesLoaded}/${this.totalTextures})`;
+            
+            if (this.texturesLoaded >= this.totalTextures) {
+                setTimeout(() => {
+                    statusElement.textContent = '✅ All textures loaded!';
+                }, 500);
+            }
+        }
+    }
+
+    /**
      * Create a star field background
      */
     createStarField() {
         const starGeometry = new THREE.BufferGeometry();
-        const starCount = 2000;
+        const starCount = 3000;
         const positions = new Float32Array(starCount * 3);
+        const colors = new Float32Array(starCount * 3);
+        const sizes = new Float32Array(starCount);
 
-        for (let i = 0; i < starCount * 3; i += 3) {
-            positions[i] = (Math.random() - 0.5) * 2000;
-            positions[i + 1] = (Math.random() - 0.5) * 2000;
-            positions[i + 2] = (Math.random() - 0.5) * 2000;
+        for (let i = 0; i < starCount; i++) {
+            const i3 = i * 3;
+            
+            // Random positions in sphere
+            positions[i3] = (Math.random() - 0.5) * 2000;
+            positions[i3 + 1] = (Math.random() - 0.5) * 2000;
+            positions[i3 + 2] = (Math.random() - 0.5) * 2000;
+            
+            // Random star colors (blue-white to red)
+            const starType = Math.random();
+            if (starType < 0.7) {
+                // White stars (most common)
+                colors[i3] = 1.0;
+                colors[i3 + 1] = 1.0;
+                colors[i3 + 2] = 1.0;
+            } else if (starType < 0.85) {
+                // Blue stars
+                colors[i3] = 0.7;
+                colors[i3 + 1] = 0.8;
+                colors[i3 + 2] = 1.0;
+            } else {
+                // Red/orange stars
+                colors[i3] = 1.0;
+                colors[i3 + 1] = 0.6;
+                colors[i3 + 2] = 0.4;
+            }
+            
+            // Variable star sizes
+            sizes[i] = Math.random() * 2 + 0.5;
         }
 
         starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        starGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+        starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+        
         const starMaterial = new THREE.PointsMaterial({ 
-            color: 0xffffff, 
+            vertexColors: true,
             size: 1,
             transparent: true,
-            opacity: 0.8
+            opacity: 0.9,
+            sizeAttenuation: false
         });
+        
         const stars = new THREE.Points(starGeometry, starMaterial);
         this.scene.add(stars);
     }
@@ -502,21 +779,94 @@ class UniverseExplorer {
      * Create a celestial body (planet, moon, sun)
      */
     createCelestialBody(name, size, color, x, y, z) {
-        const geometry = new THREE.SphereGeometry(size, 32, 32);
-        const material = new THREE.MeshPhongMaterial({ 
-            color: color,
-            shininess: 30
-        });
+        const geometry = new THREE.SphereGeometry(size, 64, 64); // Higher resolution for better texture display
+        
+        // Get texture for this celestial body
+        const bodyKey = name.toLowerCase();
+        const texture = this.textures[bodyKey];
+        
+        let material;
+        if (texture) {
+            // Use texture if available
+            if (name.toLowerCase() === 'sun') {
+                // Sun should emit light and have special material
+                material = new THREE.MeshBasicMaterial({ 
+                    map: texture,
+                    emissive: new THREE.Color(0xFFA500),
+                    emissiveIntensity: 0.3
+                });
+            } else {
+                // Regular planets and moons
+                material = new THREE.MeshPhongMaterial({ 
+                    map: texture,
+                    shininess: name.toLowerCase() === 'europa' || name.toLowerCase() === 'callisto' ? 100 : 30,
+                    // Add subtle base color that blends with texture
+                    color: new THREE.Color(color).multiplyScalar(0.8)
+                });
+            }
+        } else {
+            // Fallback to solid color if no texture
+            material = new THREE.MeshPhongMaterial({ 
+                color: color,
+                shininess: 30
+            });
+        }
+        
         const body = new THREE.Mesh(geometry, material);
         body.position.set(x, y, z);
         body.castShadow = true;
         body.receiveShadow = true;
         
+        // Add rotation for more realistic appearance
+        body.userData = {
+            rotationSpeed: 0.01 + Math.random() * 0.02,
+            name: name
+        };
+        
         // Add simple label
         this.addLabel(body, name, size);
         
+        // Add rings for Saturn
+        if (name.toLowerCase() === 'saturn') {
+            this.addSaturnRings(body, size);
+        }
+        
         this.scene.add(body);
         return body;
+    }
+
+    /**
+     * Add rings to Saturn
+     */
+    addSaturnRings(planet, planetSize) {
+        const ringGeometry = new THREE.RingGeometry(planetSize * 1.2, planetSize * 2.2, 64);
+        const ringMaterial = new THREE.MeshPhongMaterial({
+            color: 0xB8860B,
+            transparent: true,
+            opacity: 0.6,
+            side: THREE.DoubleSide
+        });
+        
+        const rings = new THREE.Mesh(ringGeometry, ringMaterial);
+        rings.rotation.x = Math.PI / 2; // Rotate to be horizontal
+        rings.rotation.z = Math.PI / 8; // Slight tilt for realism
+        
+        planet.add(rings);
+        
+        // Add inner ring detail
+        const innerRingGeometry = new THREE.RingGeometry(planetSize * 1.5, planetSize * 1.8, 32);
+        const innerRingMaterial = new THREE.MeshPhongMaterial({
+            color: 0xDAA520,
+            transparent: true,
+            opacity: 0.4,
+            side: THREE.DoubleSide
+        });
+        
+        const innerRings = new THREE.Mesh(innerRingGeometry, innerRingMaterial);
+        innerRings.rotation.x = Math.PI / 2;
+        innerRings.rotation.z = Math.PI / 8;
+        
+        planet.add(innerRings);
     }
 
     /**
@@ -568,6 +918,11 @@ class UniverseExplorer {
         Object.entries(this.celestialBodies).forEach(([name, body]) => {
             if (name === 'earth' && this.currentModel === 'aristotle') return; // Earth stays fixed in Aristotle model
             if (name === 'sun' && (this.currentModel === 'copernican' || this.currentModel === 'galilean' || this.currentModel === 'kepler')) return; // Sun stays fixed in heliocentric models
+
+            // Add planetary rotation for realism
+            if (body.object && body.object.userData.rotationSpeed) {
+                body.object.rotation.y += body.object.userData.rotationSpeed;
+            }
 
             if (body.parent) {
                 // Moon or satellite orbiting around parent
