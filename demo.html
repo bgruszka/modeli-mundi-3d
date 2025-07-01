@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Universe Models - Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+        }
+        .launch-btn {
+            display: block;
+            width: 300px;
+            margin: 30px auto;
+            padding: 15px 30px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+            text-decoration: none;
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .launch-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.3);
+        }
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .feature h3 {
+            color: #87ceeb;
+            margin-bottom: 15px;
+        }
+        .models {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        .model {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .model h4 {
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .controls h3 {
+            color: #87ceeb;
+            margin-bottom: 15px;
+        }
+        .controls ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .controls li {
+            margin: 10px 0;
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .tech-stack {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .tech-stack h3 {
+            color: #87ceeb;
+            margin-bottom: 15px;
+        }
+        .tech-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .tech-item {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌌 Historical Models of the Universe</h1>
+        <p style="text-align: center; font-size: 1.2em; margin-bottom: 30px;">
+            An interactive 3D exploration of how humanity understood the cosmos throughout history
+        </p>
+
+        <a href="index.html" class="launch-btn">🚀 Launch Application</a>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🎮 Interactive 3D Navigation</h3>
+                <p>Rotate, zoom, and pan around each cosmic model with intuitive mouse and touch controls. Experience the universe as our ancestors imagined it.</p>
+            </div>
+            <div class="feature">
+                <h3>📚 Educational Content</h3>
+                <p>Learn about each historical model with detailed descriptions and historical context. Understand the scientific revolution that transformed our worldview.</p>
+            </div>
+            <div class="feature">
+                <h3>🎭 Realistic Animations</h3>
+                <p>Watch planets move according to each model's predictions. See epicycles in action, observe elliptical orbits, and witness the dance of Jupiter's moons.</p>
+            </div>
+            <div class="feature">
+                <h3>📱 Responsive Design</h3>
+                <p>Works seamlessly across desktop, tablet, and mobile devices. Explore the universe anywhere, anytime.</p>
+            </div>
+        </div>
+
+        <h2 style="color: #ffd700; text-align: center;">Historical Models Included</h2>
+        <div class="models">
+            <div class="model">
+                <h4>Aristotle's Model (384-322 BC)</h4>
+                <p>Earth-centered universe with crystalline spheres carrying celestial bodies.</p>
+            </div>
+            <div class="model">
+                <h4>Ptolemaic Model (150 AD)</h4>
+                <p>Sophisticated geocentric system using epicycles to explain planetary motion.</p>
+            </div>
+            <div class="model">
+                <h4>Copernican Model (1543)</h4>
+                <p>Revolutionary heliocentric model with the Sun at the center.</p>
+            </div>
+            <div class="model">
+                <h4>Galilean Model (1610)</h4>
+                <p>Enhanced heliocentric model featuring Jupiter's four largest moons.</p>
+            </div>
+            <div class="model">
+                <h4>Kepler's Model (1609)</h4>
+                <p>Most accurate historical model with elliptical planetary orbits.</p>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h3>🎮 How to Use</h3>
+            <ul>
+                <li><strong>Mouse:</strong> Click and drag to rotate the view</li>
+                <li><strong>Mouse Wheel:</strong> Scroll to zoom in and out</li>
+                <li><strong>Right-click + Drag:</strong> Pan the view</li>
+                <li><strong>Touch Devices:</strong> Pinch to zoom, swipe to rotate</li>
+                <li><strong>Model Buttons:</strong> Click to switch between different universe models</li>
+            </ul>
+        </div>
+
+        <div class="tech-stack">
+            <h3>💻 Built With</h3>
+            <div class="tech-list">
+                <span class="tech-item">HTML5</span>
+                <span class="tech-item">CSS3</span>
+                <span class="tech-item">JavaScript ES6+</span>
+                <span class="tech-item">Three.js</span>
+                <span class="tech-item">WebGL</span>
+                <span class="tech-item">Canvas API</span>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 40px;">
+            <a href="index.html" class="launch-btn">🌟 Start Exploring</a>
+            <p style="margin-top: 20px; opacity: 0.8;">
+                Experience the evolution of human understanding about our place in the cosmos
+            </p>
+        </div>
+    </div>
+</body>
+</html>
