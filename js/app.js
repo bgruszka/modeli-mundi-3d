@@ -123,15 +123,20 @@ class UniverseExplorer {
         this.lights.ambient = new THREE.AmbientLight(0x404040, this.lightingSettings.ambient);
         this.scene.add(this.lights.ambient);
 
-        // Main sun light (point light)
+        // Main sun light (point light) - positioned slightly away from origin to avoid being inside sun objects
         this.lights.sun = new THREE.PointLight(0xFFE4B5, this.lightingSettings.sun, 1000);
-        this.lights.sun.position.set(0, 0, 0);
+        this.lights.sun.position.set(2, 2, 2);
         this.lights.sun.castShadow = true;
         this.lights.sun.shadow.mapSize.width = 2048;
         this.lights.sun.shadow.mapSize.height = 2048;
         this.lights.sun.shadow.camera.near = 0.1;
         this.lights.sun.shadow.camera.far = 1000;
         this.scene.add(this.lights.sun);
+
+        // Add light helper for debugging (initially hidden)
+        this.lightHelper = new THREE.PointLightHelper(this.lights.sun, 1);
+        this.lightHelper.visible = false;
+        this.scene.add(this.lightHelper);
 
         // Rim lighting for better planet definition
         this.lights.rim1 = new THREE.DirectionalLight(0x87CEEB, this.lightingSettings.rim);
@@ -513,7 +518,12 @@ class UniverseExplorer {
             this.lightingSettings.sun = value;
             this.lights.sun.intensity = value;
             sunValue.textContent = `${Math.round(value * 100)}%`;
-            console.log(`Sun intensity: ${value.toFixed(2)} (${Math.round(value * 100)}%)`);
+            console.log(`Sun intensity: ${value.toFixed(2)} (${Math.round(value * 100)}%) - Light position: (${this.lights.sun.position.x}, ${this.lights.sun.position.y}, ${this.lights.sun.position.z})`);
+            
+            // Update light helper if visible
+            if (this.lightHelper && this.lightHelper.visible) {
+                this.lightHelper.update();
+            }
         });
 
         // Rim light slider
@@ -759,10 +769,21 @@ class UniverseExplorer {
      * Debug mode to identify scene objects (non-destructive)
      */
     toggleDebugMode() {
+        // Toggle light helper visibility
+        if (this.lightHelper) {
+            this.lightHelper.visible = !this.lightHelper.visible;
+            console.log(`Light helper visibility: ${this.lightHelper.visible}`);
+        }
+        
         console.log('=== DEBUG: Scene Analysis ===');
+        console.log(`Sun light position: (${this.lights.sun.position.x}, ${this.lights.sun.position.y}, ${this.lights.sun.position.z})`);
+        console.log(`Sun light intensity: ${this.lights.sun.intensity}`);
+        console.log(`Ambient light intensity: ${this.lights.ambient.intensity}`);
+        
         let wireframeCount = 0;
         let lineCount = 0;
         let meshCount = 0;
+        let materialTypes = {};
         
         this.scene.traverse((object) => {
             if (object.type === 'Line' || object.type === 'LineSegments' || object.type === 'LineLoop') {
@@ -772,6 +793,9 @@ class UniverseExplorer {
                 meshCount++;
                 if (object.material) {
                     const material = Array.isArray(object.material) ? object.material[0] : object.material;
+                    const matType = material.constructor.name;
+                    materialTypes[matType] = (materialTypes[matType] || 0) + 1;
+                    
                     if (material.wireframe) {
                         console.log('WIREFRAME MESH:', object.type, 'visible:', object.visible, 'wireframe:', material.wireframe, object);
                         wireframeCount++;
@@ -784,6 +808,7 @@ class UniverseExplorer {
         console.log(`Wireframe objects: ${wireframeCount}`);
         console.log(`Line objects: ${lineCount}`);
         console.log(`Total mesh objects: ${meshCount}`);
+        console.log(`Material types:`, materialTypes);
         console.log(`Tracked wireframe objects: ${this.visualElements.wireframeObjects.length}`);
         console.log(`Tracked orbit objects: ${this.visualElements.orbitObjects.length}`);
         console.log(`Wireframes visible setting: ${this.visualElements.wireframesVisible}`);
