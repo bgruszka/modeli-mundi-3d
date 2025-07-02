@@ -413,15 +413,19 @@
                 font-size: 0.75em;
             }
 
-            /* Reduce panel spacing when collapsed */
-            #ui-panel.collapsed {
-                min-width: 180px;
-                max-width: 200px;
+            /* Ensure expanded panels have nice styling on mobile */
+            #ui-panel:not(.collapsed) {
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
             }
 
-            #lighting-controls.collapsed {
-                min-width: 120px;
-                max-width: 140px;
+            #lighting-controls:not(.collapsed) {
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(15px);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 15px;
             }
 
             /* Adjust preset buttons for mobile */
@@ -496,80 +500,110 @@
 
         /* Mobile-specific collapsed panel enhancements */
         @media (max-width: 768px) {
-            /* Modern floating action button style for collapsed panels */
+            /* Pure floating action button style - no background panel */
             #ui-panel.collapsed,
             #lighting-controls.collapsed {
-                background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                border-radius: 20px;
-                backdrop-filter: blur(20px);
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 
-                           0 0 0 1px rgba(255, 255, 255, 0.05);
-                min-width: 70px;
-                max-width: 70px;
-                padding: 15px 10px;
+                background: transparent;
+                border: none;
+                border-radius: 0;
+                backdrop-filter: none;
+                box-shadow: none;
+                min-width: 60px;
+                max-width: 60px;
+                padding: 5px;
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             }
 
-            /* Elegant hover effect for collapsed panels */
-            #ui-panel.collapsed:hover,
-            #lighting-controls.collapsed:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4),
-                           0 0 0 1px rgba(255, 215, 0, 0.2);
-                border-color: rgba(255, 215, 0, 0.3);
+            /* Hide all text and content when collapsed */
+            #ui-panel.collapsed h1,
+            #ui-panel.collapsed .panel-header h1,
+            #lighting-controls.collapsed h3,
+            #lighting-controls.collapsed .panel-header h3 {
+                display: none;
             }
 
-            /* Modern toggle button styling */
+            /* Modern floating action button styling */
             .toggle-btn {
-                min-width: 50px;
-                min-height: 50px;
+                min-width: 56px;
+                min-height: 56px;
                 border-radius: 50%;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border: 2px solid rgba(255, 255, 255, 0.2);
+                border: none;
                 color: white;
-                font-size: 1.4em;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                font-size: 1.5em;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
                 transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto;
+                margin: 0;
+                cursor: pointer;
+                position: relative;
+                z-index: 1000;
             }
 
-            /* Active state for toggle buttons */
+            /* Hover effect for toggle buttons */
+            .toggle-btn:hover {
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            }
+
+            /* Active state for toggle buttons - golden gradient */
             .toggle-btn.active {
-                background: linear-gradient(135deg, #ffd89b 0%, #19547b 100%);
-                border-color: rgba(255, 215, 0, 0.4);
-                box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
-                transform: scale(1.05);
+                background: linear-gradient(135deg, #ffd89b 0%, #ff9a56 100%);
+                box-shadow: 0 8px 25px rgba(255, 152, 86, 0.4);
+                transform: scale(1.02);
             }
 
-            /* Subtle pulse animation for collapsed panels */
-            #ui-panel.collapsed .toggle-btn.active,
-            #lighting-controls.collapsed .toggle-btn.active {
-                animation: subtlePulse 3s ease-in-out infinite;
+            .toggle-btn.active:hover {
+                transform: translateY(-3px) scale(1.07);
+                box-shadow: 0 10px 30px rgba(255, 152, 86, 0.5);
             }
 
-            @keyframes subtlePulse {
-                0%, 100% { box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3); }
-                50% { box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5); }
+            /* Subtle pulse animation for active floating buttons */
+            .toggle-btn.active {
+                animation: floatingPulse 4s ease-in-out infinite;
             }
 
-            /* Ultra-compact collapsed panels on small mobile */
+            @keyframes floatingPulse {
+                0%, 100% { 
+                    box-shadow: 0 8px 25px rgba(255, 152, 86, 0.4);
+                    transform: scale(1.02);
+                }
+                50% { 
+                    box-shadow: 0 12px 35px rgba(255, 152, 86, 0.6);
+                    transform: scale(1.05);
+                }
+            }
+
+            /* Positioning adjustments for floating buttons */
+            #ui-panel.collapsed {
+                top: 20px;
+                left: 20px;
+                position: absolute;
+                z-index: 1000;
+            }
+
+            #lighting-controls.collapsed {
+                top: 20px;
+                right: 20px;
+                position: absolute;
+                z-index: 1000;
+            }
+
+            /* Ultra-compact floating buttons on small mobile */
             @media (max-width: 480px) {
-                #ui-panel.collapsed,
-                #lighting-controls.collapsed {
-                    min-width: 60px;
-                    max-width: 60px;
-                    padding: 12px 8px;
-                    border-radius: 18px;
+                .toggle-btn {
+                    min-width: 50px;
+                    min-height: 50px;
+                    font-size: 1.3em;
                 }
 
-                .toggle-btn {
-                    min-width: 44px;
-                    min-height: 44px;
-                    font-size: 1.2em;
+                #ui-panel.collapsed,
+                #lighting-controls.collapsed {
+                    min-width: 50px;
+                    max-width: 50px;
+                    padding: 0;
                 }
             }
         }
