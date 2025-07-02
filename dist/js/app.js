@@ -504,116 +504,210 @@ class UniverseExplorer {
     }
 
     /**
-     * Set up mobile-friendly tooltips for all elements with title attributes
+     * Set up mobile-friendly help system (replaces problematic tooltips)
      */
     setupMobileTooltips() {
-        // Convert all title attributes to custom tooltips
-        const elementsWithTitles = document.querySelectorAll('[title]');
+        // Detect mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                         window.innerWidth <= 768 || 
+                         ('ontouchstart' in window);
         
-        elementsWithTitles.forEach(element => {
-            const titleText = element.getAttribute('title');
+        if (isMobile) {
+            // Remove all title attributes on mobile to prevent browser tooltips
+            document.querySelectorAll('[title]').forEach(element => {
+                element.removeAttribute('title');
+            });
             
-            // Check if this is a functional button that should keep original behavior
-            const isFunctionalElement = element.classList.contains('toggle-btn') || 
-                                      element.classList.contains('control-btn') || 
-                                      element.classList.contains('model-btn') || 
-                                      element.classList.contains('preset-btn') ||
-                                      element.tagName === 'INPUT';
+            // Add a help button to the controls info panel
+            this.addMobileHelpButton();
+        }
+    }
+
+    /**
+     * Add a help button that shows control information in a mobile-friendly way
+     */
+    addMobileHelpButton() {
+        const controlsInfo = document.getElementById('controls-info');
+        if (controlsInfo) {
+            // Add help button
+            const helpBtn = document.createElement('button');
+            helpBtn.innerHTML = '❓';
+            helpBtn.className = 'help-btn';
+            helpBtn.style.cssText = `
+                position: absolute;
+                top: -10px;
+                right: -10px;
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                border: none;
+                color: white;
+                font-size: 14px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                cursor: pointer;
+                z-index: 1001;
+            `;
             
-            // Remove the original title to prevent browser tooltips
-            element.removeAttribute('title');
+            helpBtn.addEventListener('click', () => {
+                this.showMobileHelp();
+            });
             
-            // Wrap element in tooltip container if not already wrapped
-            if (!element.parentElement.classList.contains('tooltip-container')) {
-                const container = document.createElement('div');
-                container.className = 'tooltip-container';
-                element.parentNode.insertBefore(container, element);
-                container.appendChild(element);
+            controlsInfo.style.position = 'relative';
+            controlsInfo.appendChild(helpBtn);
+        }
+    }
+
+    /**
+     * Show mobile help in a non-blocking way
+     */
+    showMobileHelp() {
+        // Create or update help overlay
+        let helpOverlay = document.getElementById('mobile-help-overlay');
+        
+        if (!helpOverlay) {
+            helpOverlay = document.createElement('div');
+            helpOverlay.id = 'mobile-help-overlay';
+            helpOverlay.style.cssText = `
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
+                backdrop-filter: blur(20px);
+                border-top: 1px solid rgba(255, 255, 255, 0.2);
+                border-radius: 20px 20px 0 0;
+                padding: 20px;
+                z-index: 2000;
+                transform: translateY(100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                max-height: 60vh;
+                overflow-y: auto;
+            `;
+            
+            helpOverlay.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="color: #ffd700; margin: 0; font-size: 1.1em;">📱 Controls & Help</h3>
+                    <button id="close-help" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); color: white; border-radius: 20px; padding: 5px 12px; font-size: 0.9em; cursor: pointer;">Close</button>
+                </div>
                 
-                // Create custom tooltip
-                const tooltip = document.createElement('div');
-                tooltip.className = 'custom-tooltip';
-                tooltip.textContent = titleText;
-                container.appendChild(tooltip);
-                
-                // For functional elements, only show tooltip on long press (not interfering with clicks)
-                if (isFunctionalElement) {
-                    let longPressTimer;
+                <div style="color: #cccccc; font-size: 0.9em; line-height: 1.4;">
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #87ceeb;">🌌 Navigation:</strong><br>
+                        • Drag to rotate view around models<br>
+                        • Pinch to zoom in/out<br>
+                        • Two-finger pan to move view
+                    </div>
                     
-                    element.addEventListener('touchstart', (e) => {
-                        longPressTimer = setTimeout(() => {
-                            // Hide all other tooltips
-                            document.querySelectorAll('.tooltip-container.active').forEach(container => {
-                                container.classList.remove('active');
-                            });
-                            
-                            // Show this tooltip
-                            container.classList.add('active');
-                            
-                            // Hide tooltip after 3 seconds
-                            setTimeout(() => {
-                                container.classList.remove('active');
-                            }, 3000);
-                        }, 500); // 500ms long press
-                    });
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #87ceeb;">🎛️ Panel Controls:</strong><br>
+                        • 🌌 Universe Models - Select historical cosmic models<br>
+                        • ✨ Scene Controls - Adjust lighting, speed, visibility
+                    </div>
                     
-                    element.addEventListener('touchend', () => {
-                        clearTimeout(longPressTimer);
-                    });
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #87ceeb;">💡 Lighting Presets:</strong><br>
+                        • ☀️ Bright - High visibility for study<br>
+                        • 🌙 Dark - Dramatic cosmic atmosphere<br>
+                        • 🌍 Realistic - Natural space lighting<br>
+                        • 🎭 Dramatic - High contrast shadows
+                    </div>
                     
-                    element.addEventListener('touchmove', () => {
-                        clearTimeout(longPressTimer);
-                    });
-                } else {
-                    // For non-functional elements, use normal touch behavior
-                    element.addEventListener('touchstart', (e) => {
-                        e.preventDefault();
-                        
-                        // Hide all other tooltips
-                        document.querySelectorAll('.tooltip-container.active').forEach(container => {
-                            container.classList.remove('active');
-                        });
-                        
-                        // Show this tooltip
-                        container.classList.add('active');
-                        
-                        // Hide tooltip after 3 seconds
-                        setTimeout(() => {
-                            container.classList.remove('active');
-                        }, 3000);
-                    });
+                    <div style="margin-bottom: 15px;">
+                        <strong style="color: #87ceeb;">⚡ Speed Presets:</strong><br>
+                        • 🐌 Slow (25%) - Study complex motions<br>
+                        • ⚡ Normal (100%) - Standard speed<br>
+                        • 🚀 Fast (200%) - Quick pattern viewing<br>
+                        • 🚀💨 Ultra (500%) - Very fast motion
+                    </div>
                     
-                    // Handle click for desktop and as fallback for non-functional elements
-                    element.addEventListener('click', (e) => {
-                        if (window.innerWidth <= 768) { // Mobile breakpoint
-                            // Hide all other tooltips
-                            document.querySelectorAll('.tooltip-container.active').forEach(container => {
-                                container.classList.remove('active');
-                            });
-                            
-                            // Toggle this tooltip
-                            container.classList.toggle('active');
-                            
-                            // Auto-hide after 3 seconds if shown
-                            if (container.classList.contains('active')) {
-                                setTimeout(() => {
-                                    container.classList.remove('active');
-                                }, 3000);
-                            }
-                        }
-                    });
+                    <div>
+                        <strong style="color: #87ceeb;">👁️ Visual Elements:</strong><br>
+                        • 🛸 Orbits - Show/hide orbital paths<br>
+                        • 📐 Geometry - Show/hide wireframes<br>
+                        • ⭐ Stars - Toggle background stars
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(helpOverlay);
+            
+            // Close button functionality
+            document.getElementById('close-help').addEventListener('click', () => {
+                this.hideMobileHelp();
+            });
+            
+            // Close on background tap
+            helpOverlay.addEventListener('click', (e) => {
+                if (e.target === helpOverlay) {
+                    this.hideMobileHelp();
                 }
-            }
-        });
+            });
+        }
         
-        // Hide tooltips when touching outside
-        document.addEventListener('touchstart', (e) => {
-            if (!e.target.closest('.tooltip-container')) {
-                document.querySelectorAll('.tooltip-container.active').forEach(container => {
-                    container.classList.remove('active');
-                });
-            }
-        });
+        // Show the overlay
+        setTimeout(() => {
+            helpOverlay.style.transform = 'translateY(0)';
+        }, 10);
+    }
+
+    /**
+     * Hide mobile help overlay
+     */
+    hideMobileHelp() {
+        const helpOverlay = document.getElementById('mobile-help-overlay');
+        if (helpOverlay) {
+            helpOverlay.style.transform = 'translateY(100%)';
+        }
+    }
+
+    /**
+     * Show brief toast notification (replaces tooltips for feedback)
+     */
+    showToast(message, duration = 2000) {
+        // Remove existing toast
+        const existingToast = document.getElementById('toast-notification');
+        if (existingToast) {
+            existingToast.remove();
+        }
+        
+        const toast = document.createElement('div');
+        toast.id = 'toast-notification';
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+            z-index: 3000;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        `;
+        
+        document.body.appendChild(toast);
+        
+        // Fade in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+        }, 10);
+        
+        // Fade out and remove
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 300);
+        }, duration);
     }
 
     /**
@@ -728,15 +822,14 @@ class UniverseExplorer {
                 toggleControlsBtn.title = 'Show scene controls panel';
             }
             
-            // Also update the controls info with mobile-specific instructions
+            // Update the controls info with mobile-specific instructions
             const controlsInfo = document.getElementById('controls-info');
             if (controlsInfo) {
                 controlsInfo.innerHTML = `
-                    <strong>Mobile Controls:</strong><br>
+                    <strong>Touch Controls:</strong><br>
                     • Drag: Rotate view<br>
                     • Pinch: Zoom in/out<br>
-                    • 🌌: Models panel<br>
-                    • ✨: Controls panel
+                    • 🌌: Models • ✨: Controls
                 `;
             }
         }
@@ -819,10 +912,19 @@ class UniverseExplorer {
                 
                 if (preset) {
                     this.applyLightingPreset(preset);
+                    // Show mobile feedback
+                    if (window.innerWidth <= 768) {
+                        const presetNames = {bright: 'Bright', dark: 'Dark', realistic: 'Realistic', dramatic: 'Dramatic'};
+                        this.showToast(`${presetNames[preset]} lighting applied`);
+                    }
                 }
                 
                 if (speed !== undefined) {
                     this.applySpeedPreset(parseInt(speed));
+                    // Show mobile feedback
+                    if (window.innerWidth <= 768) {
+                        this.showToast(`Speed set to ${speed}%`);
+                    }
                 }
             });
         });
@@ -833,6 +935,11 @@ class UniverseExplorer {
             this.visualElements.orbitsVisible = !this.visualElements.orbitsVisible;
             this.toggleOrbitsVisibility();
             orbitsBtn.classList.toggle('active', !this.visualElements.orbitsVisible);
+            
+            // Show mobile feedback
+            if (window.innerWidth <= 768) {
+                this.showToast(`Orbits ${this.visualElements.orbitsVisible ? 'shown' : 'hidden'}`);
+            }
             console.log(`Orbits visibility: ${this.visualElements.orbitsVisible}`);
         });
 
@@ -841,6 +948,11 @@ class UniverseExplorer {
             this.visualElements.wireframesVisible = !this.visualElements.wireframesVisible;
             this.toggleWireframesVisibility();
             wireframesBtn.classList.toggle('active', !this.visualElements.wireframesVisible);
+            
+            // Show mobile feedback
+            if (window.innerWidth <= 768) {
+                this.showToast(`Geometry ${this.visualElements.wireframesVisible ? 'shown' : 'hidden'}`);
+            }
             console.log(`Geometry/Wireframes visibility: ${this.visualElements.wireframesVisible}`);
         });
 
@@ -849,6 +961,11 @@ class UniverseExplorer {
             this.visualElements.starsVisible = !this.visualElements.starsVisible;
             this.toggleStarsVisibility();
             starsBtn.classList.toggle('active', !this.visualElements.starsVisible);
+            
+            // Show mobile feedback
+            if (window.innerWidth <= 768) {
+                this.showToast(`Stars ${this.visualElements.starsVisible ? 'shown' : 'hidden'}`);
+            }
             console.log(`Stars visibility: ${this.visualElements.starsVisible}`);
         });
 
@@ -1104,6 +1221,18 @@ class UniverseExplorer {
             <h4>${info.title}</h4>
             <p>${info.description}</p>
         `;
+
+        // Show mobile feedback
+        if (window.innerWidth <= 768) {
+            const modelNames = {
+                aristotle: "Aristotle's Model",
+                ptolemaic: "Ptolemaic Model", 
+                copernican: "Copernican Model",
+                galilean: "Galilean Model",
+                kepler: "Kepler's Model"
+            };
+            this.showToast(`${modelNames[modelName]} loaded`);
+        }
 
         this.currentModel = modelName;
         this.loadModel(modelName);
