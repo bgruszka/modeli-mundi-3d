@@ -167,6 +167,69 @@
             visibility: visible;
         }
 
+        /* Collapsible panel styles */
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .panel-header h1,
+        .panel-header h3 {
+            margin: 0;
+            flex: 1;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffd700;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            margin-left: 10px;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .toggle-btn.active {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .panel-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .panel-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Panel collapse states */
+        #ui-panel.collapsed {
+            min-width: auto;
+            width: auto;
+        }
+
+        #lighting-controls.collapsed {
+            min-width: auto;
+            width: auto;
+        }
+
+        .panel-header .toggle-btn {
+            flex-shrink: 0;
+        }
+
         #lighting-controls {
             position: absolute;
             top: 20px;
@@ -377,11 +440,15 @@
         </div>
         
         <div id="ui-panel">
-            <h1>Historical Universe Models</h1>
+            <div class="panel-header">
+                <h1>Historical Universe Models</h1>
+                <button id="toggle-ui-panel" class="toggle-btn" title="Toggle model selection panel">📋</button>
+            </div>
             
-            <div class="model-selector">
-                <h3>Select a Cosmic Model:</h3>
-                <div class="model-buttons">
+            <div id="ui-content" class="panel-content">
+                <div class="model-selector">
+                    <h3>Select a Cosmic Model:</h3>
+                    <div class="model-buttons">
                     <button class="model-btn active" data-model="aristotle" title="Earth-centered model with crystalline spheres carrying celestial bodies">Aristotle's Model (384-322 BC)</button>
                     <button class="model-btn" data-model="ptolemaic" title="Geocentric model with epicycles to explain retrograde planetary motion">Ptolemaic Model (150 AD)</button>
                     <button class="model-btn" data-model="copernican" title="Revolutionary Sun-centered model with circular planetary orbits">Copernican Model (1543)</button>
@@ -390,15 +457,21 @@
                 </div>
             </div>
 
-            <div id="info-panel">
-                <h4>Aristotle's Geocentric Model</h4>
-                <p>The earliest systematic model where Earth sits at the center of the universe, surrounded by concentric crystalline spheres carrying the celestial bodies. The outermost sphere contains the fixed stars.</p>
-                <p><em>✨ Enhanced with realistic planet textures and atmospheric lighting effects!</em></p>
+                <div id="info-panel">
+                    <h4>Aristotle's Geocentric Model</h4>
+                    <p>The earliest systematic model where Earth sits at the center of the universe, surrounded by concentric crystalline spheres carrying the celestial bodies. The outermost sphere contains the fixed stars.</p>
+                    <p><em>✨ Enhanced with realistic planet textures and atmospheric lighting effects!</em></p>
+                </div>
             </div>
         </div>
 
         <div id="lighting-controls">
-            <h3>🎛️ Scene Controls</h3>
+            <div class="panel-header">
+                <h3>🎛️ Scene Controls</h3>
+                <button id="toggle-controls-panel" class="toggle-btn" title="Toggle scene controls panel">🎛️</button>
+            </div>
+            
+            <div id="controls-content" class="panel-content">
             
             <div class="control-group">
                 <label>🌞 Ambient Light</label>
@@ -473,6 +546,7 @@
                     <button class="preset-btn" data-speed="500" title="500% speed - very fast motion to see long-term patterns">🚀💨 Ultra</button>
                 </div>
             </div>
+            </div>
         </div>
 
         <div id="controls-info">
@@ -480,7 +554,9 @@
             • Mouse: Rotate view<br>
             • Wheel: Zoom in/out<br>
             • Right-click + drag: Pan<br>
-            • Touch: Pinch to zoom
+            • Touch: Pinch to zoom<br>
+            • H: Toggle model panel<br>
+            • C: Toggle controls panel
         </div>
     </div>
 

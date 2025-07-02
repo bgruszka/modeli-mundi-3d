@@ -495,6 +495,9 @@ class UniverseExplorer {
 
         // Set up mobile-friendly tooltips
         this.setupMobileTooltips();
+
+        // Set up collapsible panels
+        this.setupCollapsiblePanels();
     }
 
     /**
@@ -569,6 +572,80 @@ class UniverseExplorer {
                 document.querySelectorAll('.tooltip-container.active').forEach(container => {
                     container.classList.remove('active');
                 });
+            }
+        });
+    }
+
+    /**
+     * Set up collapsible panels for UI and controls
+     */
+    setupCollapsiblePanels() {
+        // UI Panel toggle
+        const toggleUiBtn = document.getElementById('toggle-ui-panel');
+        const uiContent = document.getElementById('ui-content');
+        const uiPanel = document.getElementById('ui-panel');
+        
+        if (toggleUiBtn && uiContent) {
+            toggleUiBtn.addEventListener('click', () => {
+                const isCollapsed = uiContent.classList.contains('collapsed');
+                
+                if (isCollapsed) {
+                    // Expand
+                    uiContent.classList.remove('collapsed');
+                    uiPanel.classList.remove('collapsed');
+                    toggleUiBtn.classList.remove('active');
+                    toggleUiBtn.textContent = '📋';
+                    toggleUiBtn.title = 'Hide model selection panel';
+                } else {
+                    // Collapse
+                    uiContent.classList.add('collapsed');
+                    uiPanel.classList.add('collapsed');
+                    toggleUiBtn.classList.add('active');
+                    toggleUiBtn.textContent = '📖';
+                    toggleUiBtn.title = 'Show model selection panel';
+                }
+            });
+        }
+        
+        // Controls Panel toggle
+        const toggleControlsBtn = document.getElementById('toggle-controls-panel');
+        const controlsContent = document.getElementById('controls-content');
+        const controlsPanel = document.getElementById('lighting-controls');
+        
+        if (toggleControlsBtn && controlsContent) {
+            toggleControlsBtn.addEventListener('click', () => {
+                const isCollapsed = controlsContent.classList.contains('collapsed');
+                
+                if (isCollapsed) {
+                    // Expand
+                    controlsContent.classList.remove('collapsed');
+                    controlsPanel.classList.remove('collapsed');
+                    toggleControlsBtn.classList.remove('active');
+                    toggleControlsBtn.textContent = '🎛️';
+                    toggleControlsBtn.title = 'Hide scene controls panel';
+                } else {
+                    // Collapse
+                    controlsContent.classList.add('collapsed');
+                    controlsPanel.classList.add('collapsed');
+                    toggleControlsBtn.classList.add('active');
+                    toggleControlsBtn.textContent = '⚙️';
+                    toggleControlsBtn.title = 'Show scene controls panel';
+                }
+            });
+        }
+        
+        // Add keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'h' || e.key === 'H') {
+                // Toggle UI panel with 'H' key
+                if (toggleUiBtn) {
+                    toggleUiBtn.click();
+                }
+            } else if (e.key === 'c' || e.key === 'C') {
+                // Toggle controls panel with 'C' key
+                if (toggleControlsBtn) {
+                    toggleControlsBtn.click();
+                }
             }
         });
     }
