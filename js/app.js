@@ -492,6 +492,85 @@ class UniverseExplorer {
             this.camera.updateProjectionMatrix();
             this.renderer.setSize(window.innerWidth, window.innerHeight);
         });
+
+        // Set up mobile-friendly tooltips
+        this.setupMobileTooltips();
+    }
+
+    /**
+     * Set up mobile-friendly tooltips for all elements with title attributes
+     */
+    setupMobileTooltips() {
+        // Convert all title attributes to custom tooltips
+        const elementsWithTitles = document.querySelectorAll('[title]');
+        
+        elementsWithTitles.forEach(element => {
+            const titleText = element.getAttribute('title');
+            
+            // Remove the original title to prevent browser tooltips
+            element.removeAttribute('title');
+            
+            // Wrap element in tooltip container if not already wrapped
+            if (!element.parentElement.classList.contains('tooltip-container')) {
+                const container = document.createElement('div');
+                container.className = 'tooltip-container';
+                element.parentNode.insertBefore(container, element);
+                container.appendChild(element);
+                
+                // Create custom tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'custom-tooltip';
+                tooltip.textContent = titleText;
+                container.appendChild(tooltip);
+                
+                // Handle touch/click events for mobile
+                element.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    
+                    // Hide all other tooltips
+                    document.querySelectorAll('.tooltip-container.active').forEach(container => {
+                        container.classList.remove('active');
+                    });
+                    
+                    // Show this tooltip
+                    container.classList.add('active');
+                    
+                    // Hide tooltip after 3 seconds
+                    setTimeout(() => {
+                        container.classList.remove('active');
+                    }, 3000);
+                });
+                
+                // Handle click for desktop and as fallback
+                element.addEventListener('click', () => {
+                    if (window.innerWidth <= 768) { // Mobile breakpoint
+                        // Hide all other tooltips
+                        document.querySelectorAll('.tooltip-container.active').forEach(container => {
+                            container.classList.remove('active');
+                        });
+                        
+                        // Toggle this tooltip
+                        container.classList.toggle('active');
+                        
+                        // Auto-hide after 3 seconds if shown
+                        if (container.classList.contains('active')) {
+                            setTimeout(() => {
+                                container.classList.remove('active');
+                            }, 3000);
+                        }
+                    }
+                });
+            }
+        });
+        
+        // Hide tooltips when touching outside
+        document.addEventListener('touchstart', (e) => {
+            if (!e.target.closest('.tooltip-container')) {
+                document.querySelectorAll('.tooltip-container.active').forEach(container => {
+                    container.classList.remove('active');
+                });
+            }
+        });
     }
 
     /**
