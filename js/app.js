@@ -510,6 +510,13 @@ class UniverseExplorer {
         elementsWithTitles.forEach(element => {
             const titleText = element.getAttribute('title');
             
+            // Check if this is a functional button that should keep original behavior
+            const isFunctionalElement = element.classList.contains('toggle-btn') || 
+                                      element.classList.contains('control-btn') || 
+                                      element.classList.contains('model-btn') || 
+                                      element.classList.contains('preset-btn') ||
+                                      element.tagName === 'INPUT';
+            
             // Remove the original title to prevent browser tooltips
             element.removeAttribute('title');
             
@@ -526,43 +533,73 @@ class UniverseExplorer {
                 tooltip.textContent = titleText;
                 container.appendChild(tooltip);
                 
-                // Handle touch/click events for mobile
-                element.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
+                // For functional elements, only show tooltip on long press (not interfering with clicks)
+                if (isFunctionalElement) {
+                    let longPressTimer;
                     
-                    // Hide all other tooltips
-                    document.querySelectorAll('.tooltip-container.active').forEach(container => {
-                        container.classList.remove('active');
+                    element.addEventListener('touchstart', (e) => {
+                        longPressTimer = setTimeout(() => {
+                            // Hide all other tooltips
+                            document.querySelectorAll('.tooltip-container.active').forEach(container => {
+                                container.classList.remove('active');
+                            });
+                            
+                            // Show this tooltip
+                            container.classList.add('active');
+                            
+                            // Hide tooltip after 3 seconds
+                            setTimeout(() => {
+                                container.classList.remove('active');
+                            }, 3000);
+                        }, 500); // 500ms long press
                     });
                     
-                    // Show this tooltip
-                    container.classList.add('active');
+                    element.addEventListener('touchend', () => {
+                        clearTimeout(longPressTimer);
+                    });
                     
-                    // Hide tooltip after 3 seconds
-                    setTimeout(() => {
-                        container.classList.remove('active');
-                    }, 3000);
-                });
-                
-                // Handle click for desktop and as fallback
-                element.addEventListener('click', () => {
-                    if (window.innerWidth <= 768) { // Mobile breakpoint
+                    element.addEventListener('touchmove', () => {
+                        clearTimeout(longPressTimer);
+                    });
+                } else {
+                    // For non-functional elements, use normal touch behavior
+                    element.addEventListener('touchstart', (e) => {
+                        e.preventDefault();
+                        
                         // Hide all other tooltips
                         document.querySelectorAll('.tooltip-container.active').forEach(container => {
                             container.classList.remove('active');
                         });
                         
-                        // Toggle this tooltip
-                        container.classList.toggle('active');
+                        // Show this tooltip
+                        container.classList.add('active');
                         
-                        // Auto-hide after 3 seconds if shown
-                        if (container.classList.contains('active')) {
-                            setTimeout(() => {
+                        // Hide tooltip after 3 seconds
+                        setTimeout(() => {
+                            container.classList.remove('active');
+                        }, 3000);
+                    });
+                    
+                    // Handle click for desktop and as fallback for non-functional elements
+                    element.addEventListener('click', (e) => {
+                        if (window.innerWidth <= 768) { // Mobile breakpoint
+                            // Hide all other tooltips
+                            document.querySelectorAll('.tooltip-container.active').forEach(container => {
                                 container.classList.remove('active');
-                            }, 3000);
+                            });
+                            
+                            // Toggle this tooltip
+                            container.classList.toggle('active');
+                            
+                            // Auto-hide after 3 seconds if shown
+                            if (container.classList.contains('active')) {
+                                setTimeout(() => {
+                                    container.classList.remove('active');
+                                }, 3000);
+                            }
                         }
-                    }
-                });
+                    });
+                }
             }
         });
         
