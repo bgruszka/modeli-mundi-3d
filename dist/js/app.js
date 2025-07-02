@@ -641,7 +641,7 @@ class UniverseExplorer {
                     uiContent.classList.add('collapsed');
                     uiPanel.classList.add('collapsed');
                     toggleUiBtn.classList.add('active');
-                    toggleUiBtn.textContent = '📖';
+                    toggleUiBtn.textContent = '🌌';
                     toggleUiBtn.title = 'Show model selection panel';
                 }
             });
@@ -668,7 +668,7 @@ class UniverseExplorer {
                     controlsContent.classList.add('collapsed');
                     controlsPanel.classList.add('collapsed');
                     toggleControlsBtn.classList.add('active');
-                    toggleControlsBtn.textContent = '⚙️';
+                    toggleControlsBtn.textContent = '✨';
                     toggleControlsBtn.title = 'Show scene controls panel';
                 }
             });
@@ -711,7 +711,7 @@ class UniverseExplorer {
                 uiContent.classList.add('collapsed');
                 uiPanel.classList.add('collapsed');
                 toggleUiBtn.classList.add('active');
-                toggleUiBtn.textContent = '📖';
+                toggleUiBtn.textContent = '🌌';
                 toggleUiBtn.title = 'Show model selection panel';
             }
             
@@ -724,7 +724,7 @@ class UniverseExplorer {
                 controlsContent.classList.add('collapsed');
                 controlsPanel.classList.add('collapsed');
                 toggleControlsBtn.classList.add('active');
-                toggleControlsBtn.textContent = '⚙️';
+                toggleControlsBtn.textContent = '✨';
                 toggleControlsBtn.title = 'Show scene controls panel';
             }
             
@@ -735,8 +735,8 @@ class UniverseExplorer {
                     <strong>Mobile Controls:</strong><br>
                     • Drag: Rotate view<br>
                     • Pinch: Zoom in/out<br>
-                    • 📖: Models panel<br>
-                    • ⚙️: Controls panel
+                    • 🌌: Models panel<br>
+                    • ✨: Controls panel
                 `;
             }
         }
