@@ -302,11 +302,11 @@
             <div class="model-selector">
                 <h3>Select a Cosmic Model:</h3>
                 <div class="model-buttons">
-                    <button class="model-btn active" data-model="aristotle">Aristotle's Model (384-322 BC)</button>
-                    <button class="model-btn" data-model="ptolemaic">Ptolemaic Model (150 AD)</button>
-                    <button class="model-btn" data-model="copernican">Copernican Model (1543)</button>
-                    <button class="model-btn" data-model="galilean">Galilean Model (1610)</button>
-                    <button class="model-btn" data-model="kepler">Kepler's Model (1609)</button>
+                    <button class="model-btn active" data-model="aristotle" title="Earth-centered model with crystalline spheres carrying celestial bodies">Aristotle's Model (384-322 BC)</button>
+                    <button class="model-btn" data-model="ptolemaic" title="Geocentric model with epicycles to explain retrograde planetary motion">Ptolemaic Model (150 AD)</button>
+                    <button class="model-btn" data-model="copernican" title="Revolutionary Sun-centered model with circular planetary orbits">Copernican Model (1543)</button>
+                    <button class="model-btn" data-model="galilean" title="Heliocentric model enhanced with Jupiter's four largest moons">Galilean Model (1610)</button>
+                    <button class="model-btn" data-model="kepler" title="Sun-centered model with elliptical orbits based on precise observations">Kepler's Model (1609)</button>
                 </div>
             </div>
 
@@ -324,7 +324,8 @@
                 <label>🌞 Ambient Light</label>
                 <div class="slider-container">
                     <input type="range" id="ambient-slider" class="brightness-slider" 
-                           min="0" max="100" value="40">
+                           min="0" max="100" value="40"
+                           title="Controls overall scene brightness - the minimum light level that illuminates all objects evenly">
                     <span id="ambient-value" class="brightness-value">40%</span>
                 </div>
             </div>
@@ -333,7 +334,8 @@
                 <label>💡 Sun Intensity</label>
                 <div class="slider-container">
                     <input type="range" id="sun-slider" class="brightness-slider" 
-                           min="0" max="300" value="200">
+                           min="0" max="300" value="200"
+                           title="Controls the main directional light intensity - affects shadows and planet illumination (0-300%)">
                     <span id="sun-value" class="brightness-value">200%</span>
                 </div>
             </div>
@@ -342,7 +344,8 @@
                 <label>✨ Rim Light</label>
                 <div class="slider-container">
                     <input type="range" id="rim-slider" class="brightness-slider" 
-                           min="0" max="100" value="30">
+                           min="0" max="100" value="30"
+                           title="Controls edge lighting that helps define planet shapes and adds atmospheric effects">
                     <span id="rim-value" class="brightness-value">30%</span>
                 </div>
             </div>
@@ -351,42 +354,43 @@
                 <label>⚡ Animation Speed</label>
                 <div class="slider-container">
                     <input type="range" id="speed-slider" class="brightness-slider" 
-                           min="0" max="500" value="100">
+                           min="0" max="500" value="100"
+                           title="Controls planetary motion speed - 0% pauses, 100% normal speed, up to 500% for fast motion">
                     <span id="speed-value" class="brightness-value">100%</span>
                 </div>
             </div>
 
             <div class="control-buttons">
-                <button id="pause-btn" class="control-btn">⏸️ Pause</button>
-                <button id="reset-btn" class="control-btn">🔄 Reset</button>
+                <button id="pause-btn" class="control-btn" title="Pause/resume planetary motion and rotation">⏸️ Pause</button>
+                <button id="reset-btn" class="control-btn" title="Reset all lighting and speed settings to default values">🔄 Reset</button>
             </div>
 
             <div class="control-group">
                 <label>🔗 Visual Elements</label>
                 <div class="control-buttons">
-                    <button id="orbits-btn" class="control-btn">🛸 Orbits</button>
-                    <button id="wireframes-btn" class="control-btn">📐 Geometry</button>
+                    <button id="orbits-btn" class="control-btn" title="Toggle visibility of orbital paths, rings, and epicycles">🛸 Orbits</button>
+                    <button id="wireframes-btn" class="control-btn" title="Toggle visibility of wireframe spheres and geometric construction elements">📐 Geometry</button>
                 </div>
                 <div class="control-buttons" style="margin-top: 8px;">
-                    <button id="stars-btn" class="control-btn">⭐ Stars</button>
-                    <button id="debug-btn" class="control-btn">🔧 Debug</button>
+                    <button id="stars-btn" class="control-btn" title="Toggle visibility of the background star field">⭐ Stars</button>
+                    <button id="debug-btn" class="control-btn" title="Log scene analysis to console for debugging purposes">🔧 Debug</button>
                 </div>
             </div>
 
             <div class="preset-buttons">
-                <button class="preset-btn" data-preset="bright">☀️ Bright</button>
-                <button class="preset-btn" data-preset="dark">🌙 Dark</button>
-                <button class="preset-btn" data-preset="realistic">🌍 Realistic</button>
-                <button class="preset-btn" data-preset="dramatic">🎭 Dramatic</button>
+                <button class="preset-btn" data-preset="bright" title="High ambient and sun intensity for detailed viewing">☀️ Bright</button>
+                <button class="preset-btn" data-preset="dark" title="Low lighting for dramatic cosmic atmosphere">🌙 Dark</button>
+                <button class="preset-btn" data-preset="realistic" title="Balanced lighting similar to actual space conditions">🌍 Realistic</button>
+                <button class="preset-btn" data-preset="dramatic" title="High contrast lighting with strong shadows">🎭 Dramatic</button>
             </div>
 
             <div class="control-group" style="margin-top: 15px;">
                 <label>🎬 Speed Presets</label>
                 <div class="preset-buttons">
-                    <button class="preset-btn" data-speed="25">🐌 Slow</button>
-                    <button class="preset-btn" data-speed="100">⚡ Normal</button>
-                    <button class="preset-btn" data-speed="200">🚀 Fast</button>
-                    <button class="preset-btn" data-speed="0">⏸️ Stop</button>
+                    <button class="preset-btn" data-speed="25" title="25% speed - perfect for studying complex motions">🐌 Slow</button>
+                    <button class="preset-btn" data-speed="100" title="100% speed - normal planetary motion">⚡ Normal</button>
+                    <button class="preset-btn" data-speed="200" title="200% speed - fast motion to see orbital patterns">🚀 Fast</button>
+                    <button class="preset-btn" data-speed="0" title="0% speed - completely stop all motion">⏸️ Stop</button>
                 </div>
             </div>
         </div>

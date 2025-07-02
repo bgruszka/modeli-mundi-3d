@@ -504,15 +504,16 @@ class UniverseExplorer {
             ambientValue.textContent = `${Math.round(value * 100)}%`;
         });
 
-        // Sun light slider
+        // Sun light slider (range 0-300, so divide by 100 for 0-3.0 intensity)
         const sunSlider = document.getElementById('sun-slider');
         const sunValue = document.getElementById('sun-value');
         
         sunSlider.addEventListener('input', (e) => {
-            const value = parseFloat(e.target.value) / 100;
+            const value = parseFloat(e.target.value) / 100; // Convert 0-300 to 0-3.0
             this.lightingSettings.sun = value;
             this.lights.sun.intensity = value;
             sunValue.textContent = `${Math.round(value * 100)}%`;
+            console.log(`Sun intensity: ${value.toFixed(2)} (${Math.round(value * 100)}%)`);
         });
 
         // Rim light slider
