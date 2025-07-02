@@ -1332,7 +1332,7 @@ class UniverseExplorer {
                 }
             } else if (body.semiMajorAxis && body.eccentricity !== undefined) {
                 // Kepler elliptical orbit
-                body.angle += body.speed * 0.01;
+                body.angle += body.speed * 0.01 * this.animationSpeed;
                 const r = body.semiMajorAxis * (1 - body.eccentricity * body.eccentricity) / 
                          (1 + body.eccentricity * Math.cos(body.angle));
                 const x = r * Math.cos(body.angle);
