@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historical Models of the Universe - 3D Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        #container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        #ui-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 20px;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        #ui-panel h1 {
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            color: #ffd700;
+            text-align: center;
+        }
+
+        .model-selector {
+            margin-bottom: 20px;
+        }
+
+        .model-selector h3 {
+            margin-bottom: 10px;
+            color: #87ceeb;
+        }
+
+        .model-buttons {
+            display: grid;
+            gap: 8px;
+        }
+
+        .model-btn {
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .model-btn:hover {
+            background: linear-gradient(45deg, #2a5298, #3d6bb3);
+            transform: translateY(-2px);
+        }
+
+        .model-btn.active {
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            color: #000;
+        }
+
+        #info-panel {
+            background: rgba(20, 20, 20, 0.9);
+            border-top: 1px solid #333;
+            padding: 15px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        #info-panel h4 {
+            color: #ffd700;
+            margin-bottom: 8px;
+        }
+
+        #info-panel p {
+            font-size: 0.85em;
+            line-height: 1.4;
+            color: #cccccc;
+        }
+
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            color: #ccc;
+            max-width: 200px;
+        }
+
+        /* Custom mobile-friendly tooltip system */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .custom-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            max-width: 250px;
+            white-space: normal;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            pointer-events: none;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .custom-tooltip:after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+        }
+
+        .custom-tooltip.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Show tooltip on hover for desktop */
+        @media (hover: hover) {
+            .tooltip-container:hover .custom-tooltip {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        /* For touch devices, show tooltip when element has 'active' class */
+        .tooltip-container.active .custom-tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Collapsible panel styles */
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .panel-header h1,
+        .panel-header h3 {
+            margin: 0;
+            flex: 1;
+        }
+
+        .toggle-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffd700;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            margin-left: 10px;
+        }
+
+        .toggle-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .toggle-btn.active {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: #ffd700;
+        }
+
+        .panel-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .panel-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Panel collapse states */
+        #ui-panel.collapsed {
+            min-width: auto;
+            width: auto;
+        }
+
+        #lighting-controls.collapsed {
+            min-width: auto;
+            width: auto;
+        }
+
+        .panel-header .toggle-btn {
+            flex-shrink: 0;
+        }
+
+        #lighting-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #333;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 250px;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        #lighting-controls h3 {
+            color: #ffd700;
+            margin: 0 0 15px 0;
+            font-size: 1em;
+            text-align: center;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        .control-group label {
+            display: block;
+            color: #87ceeb;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brightness-slider {
+            flex: 1;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .brightness-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .brightness-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
+
+        .brightness-value {
+            color: #ffd700;
+            font-size: 0.8em;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .control-btn {
+            flex: 1;
+            background: linear-gradient(45deg, #1e3c72, #2a5298);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.8em;
+        }
+
+        .control-btn:hover {
+            background: linear-gradient(45deg, #2a5298, #3d6bb3);
+            transform: translateY(-1px);
+        }
+
+        .control-btn.active {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a52);
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .preset-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 6px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.75em;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            color: #ffd700;
+        }
+
+        @media (max-width: 768px) {
+            #ui-panel {
+                min-width: 280px;
+                max-width: 300px;
+                top: 10px;
+                left: 10px;
+                padding: 15px;
+            }
+
+            #lighting-controls {
+                top: 10px;
+                right: 10px;
+                min-width: 200px;
+                padding: 12px;
+            }
+
+            #lighting-controls h3 {
+                font-size: 0.9em;
+                margin-bottom: 10px;
+            }
+
+            .control-group {
+                margin-bottom: 12px;
+            }
+
+            .control-btn {
+                padding: 6px 8px;
+                font-size: 0.75em;
+            }
+
+            #controls-info {
+                bottom: 10px;
+                right: 10px;
+                padding: 10px;
+                font-size: 0.7em;
+                max-width: 150px;
+            }
+
+            .model-btn {
+                padding: 8px 12px;
+                font-size: 0.8em;
+            }
+
+            /* Mobile tooltip adjustments */
+            .custom-tooltip {
+                max-width: 200px;
+                font-size: 0.75em;
+                bottom: 110%;
+            }
+            
+            /* Add tap indication for mobile */
+            .tooltip-container::after {
+                content: '💬';
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                font-size: 0.6em;
+                opacity: 0.6;
+                pointer-events: none;
+            }
+            
+            @media (hover: hover) {
+                .tooltip-container::after {
+                    display: none;
+                }
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <div id="loading">
+            <div>Loading Universe Models...</div>
+            <div id="texture-status" style="font-size: 0.8em; margin-top: 10px; opacity: 0.8;">
+                Loading planet textures...
+            </div>
+        </div>
+        
+        <div id="ui-panel">
+            <div class="panel-header">
+                <h1>Historical Universe Models</h1>
+                <button id="toggle-ui-panel" class="toggle-btn" title="Toggle model selection panel">📋</button>
+            </div>
+            
+            <div id="ui-content" class="panel-content">
+                <div class="model-selector">
+                    <h3>Select a Cosmic Model:</h3>
+                    <div class="model-buttons">
+                    <button class="model-btn active" data-model="aristotle" title="Earth-centered model with crystalline spheres carrying celestial bodies">Aristotle's Model (384-322 BC)</button>
+                    <button class="model-btn" data-model="ptolemaic" title="Geocentric model with epicycles to explain retrograde planetary motion">Ptolemaic Model (150 AD)</button>
+                    <button class="model-btn" data-model="copernican" title="Revolutionary Sun-centered model with circular planetary orbits">Copernican Model (1543)</button>
+                    <button class="model-btn" data-model="galilean" title="Heliocentric model enhanced with Jupiter's four largest moons">Galilean Model (1610)</button>
+                    <button class="model-btn" data-model="kepler" title="Sun-centered model with elliptical orbits based on precise observations">Kepler's Model (1609)</button>
+                </div>
+            </div>
+
+                <div id="info-panel">
+                    <h4>Aristotle's Geocentric Model</h4>
+                    <p>The earliest systematic model where Earth sits at the center of the universe, surrounded by concentric crystalline spheres carrying the celestial bodies. The outermost sphere contains the fixed stars.</p>
+                    <p><em>✨ Enhanced with realistic planet textures and atmospheric lighting effects!</em></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="lighting-controls">
+            <div class="panel-header">
+                <h3>🎛️ Scene Controls</h3>
+                <button id="toggle-controls-panel" class="toggle-btn" title="Toggle scene controls panel">🎛️</button>
+            </div>
+            
+            <div id="controls-content" class="panel-content">
+            
+            <div class="control-group">
+                <label>🌞 Ambient Light</label>
+                <div class="slider-container">
+                    <input type="range" id="ambient-slider" class="brightness-slider" 
+                           min="0" max="100" value="15"
+                           title="Controls overall scene brightness - the minimum light level that illuminates all objects evenly">
+                    <span id="ambient-value" class="brightness-value">15%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>💡 Sun Intensity</label>
+                <div class="slider-container">
+                    <input type="range" id="sun-slider" class="brightness-slider" 
+                           min="0" max="300" value="250"
+                           title="Controls the main directional light intensity - affects shadows and planet illumination (0-300%)">
+                    <span id="sun-value" class="brightness-value">250%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>✨ Rim Light</label>
+                <div class="slider-container">
+                    <input type="range" id="rim-slider" class="brightness-slider" 
+                           min="0" max="100" value="20"
+                           title="Controls edge lighting that helps define planet shapes and adds atmospheric effects">
+                    <span id="rim-value" class="brightness-value">20%</span>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>⚡ Animation Speed</label>
+                <div class="slider-container">
+                    <input type="range" id="speed-slider" class="brightness-slider" 
+                           min="0" max="500" value="100"
+                           title="Controls planetary motion speed - 0% pauses, 100% normal speed, up to 500% for fast motion">
+                    <span id="speed-value" class="brightness-value">100%</span>
+                </div>
+            </div>
+
+            <div class="control-buttons">
+                <button id="pause-btn" class="control-btn" title="Pause/resume planetary motion and rotation">⏸️ Pause</button>
+                <button id="reset-btn" class="control-btn" title="Reset all lighting and speed settings to default values">🔄 Reset</button>
+            </div>
+
+            <div class="control-group">
+                <label>🔗 Visual Elements</label>
+                <div class="control-buttons">
+                    <button id="orbits-btn" class="control-btn" title="Toggle visibility of orbital paths, rings, and epicycles">🛸 Orbits</button>
+                    <button id="wireframes-btn" class="control-btn" title="Toggle visibility of wireframe spheres and geometric construction elements">📐 Geometry</button>
+                </div>
+                <div class="control-buttons" style="margin-top: 8px;">
+                    <button id="stars-btn" class="control-btn" title="Toggle visibility of the background star field">⭐ Stars</button>
+                    <button id="debug-btn" class="control-btn" title="Log scene analysis to console & toggle light helper visibility">🔧 Debug</button>
+                </div>
+            </div>
+
+            <div class="preset-buttons">
+                <button class="preset-btn" data-preset="bright" title="High ambient and sun intensity for detailed viewing">☀️ Bright</button>
+                <button class="preset-btn" data-preset="dark" title="Low lighting for dramatic cosmic atmosphere">🌙 Dark</button>
+                <button class="preset-btn" data-preset="realistic" title="Balanced lighting similar to actual space conditions">🌍 Realistic</button>
+                <button class="preset-btn" data-preset="dramatic" title="High contrast lighting with strong shadows">🎭 Dramatic</button>
+            </div>
+
+            <div class="control-group" style="margin-top: 15px;">
+                <label>🎬 Speed Presets</label>
+                <div class="preset-buttons">
+                    <button class="preset-btn" data-speed="25" title="25% speed - perfect for studying complex motions">🐌 Slow</button>
+                    <button class="preset-btn" data-speed="100" title="100% speed - normal planetary motion">⚡ Normal</button>
+                    <button class="preset-btn" data-speed="200" title="200% speed - fast motion to see orbital patterns">🚀 Fast</button>
+                    <button class="preset-btn" data-speed="500" title="500% speed - very fast motion to see long-term patterns">🚀💨 Ultra</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <div id="controls-info">
+            <strong>Controls:</strong><br>
+            • Mouse: Rotate view<br>
+            • Wheel: Zoom in/out<br>
+            • Right-click + drag: Pan<br>
+            • Touch: Pinch to zoom<br>
+            • H: Toggle model panel<br>
+            • C: Toggle controls panel
+        </div>
+    </div>
+
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- OrbitControls for camera manipulation -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <script src="js/app.js"></script>
+</body>
+</html>
