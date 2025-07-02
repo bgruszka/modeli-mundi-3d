@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Historical Universe Models</string>
+    <string name="title_activity_main">Historical Universe Models</string>
+    <string name="package_name">com.universalmodels.app</string>
+    <string name="custom_url_scheme">com.universalmodels.app</string>
+</resources>

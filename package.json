@@ -1,0 +1,42 @@
+{
+  "name": "historical-universe-models",
+  "version": "1.0.0",
+  "description": "An interactive web application that visualizes different historical models of the cosmos using Three.js. Explore how humanity's understanding of the universe evolved from ancient times to the early modern period.",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm run copy:assets",
+    "copy:assets": "cp -r index.html js/ dist/",
+    "android:build": "npm run build && npx cap copy android && npx cap sync android",
+    "android:run": "npm run android:build && npx cap run android",
+    "android:open": "npx cap open android",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bgruszka/modeli-mundi-3d.git"
+  },
+  "keywords": [
+    "astronomy",
+    "education",
+    "3d",
+    "threejs",
+    "historical",
+    "universe",
+    "android",
+    "mobile"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bgruszka/modeli-mundi-3d/issues"
+  },
+  "homepage": "https://github.com/bgruszka/modeli-mundi-3d#readme",
+  "dependencies": {
+    "@capacitor/android": "^6.1.2",
+    "@capacitor/core": "^6.1.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.1.2",
+    "typescript": "^5.6.3"
+  }
+}
