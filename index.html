@@ -490,6 +490,43 @@
                 padding: 3px 5px;
                 font-size: 0.65em;
             }
+
+            /* Ultra-compact collapsed panels on small mobile */
+            #ui-panel.collapsed {
+                min-width: 60px;
+                max-width: 80px;
+                padding: 8px;
+            }
+
+            #lighting-controls.collapsed {
+                min-width: 60px;
+                max-width: 80px;
+                padding: 8px;
+            }
+        }
+
+        /* Mobile-specific collapsed panel enhancements */
+        @media (max-width: 768px) {
+            /* Add subtle glow to toggle buttons on mobile for better visibility */
+            .toggle-btn.active {
+                background: rgba(255, 215, 0, 0.3);
+                border-color: #ffd700;
+                box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+            }
+
+            /* Make collapsed panels slightly transparent to show more of the scene */
+            #ui-panel.collapsed,
+            #lighting-controls.collapsed {
+                background: rgba(0, 0, 0, 0.6);
+                backdrop-filter: blur(8px);
+            }
+
+            /* Ensure toggle buttons are touch-friendly */
+            .toggle-btn {
+                min-width: 40px;
+                min-height: 40px;
+                font-size: 1.2em;
+            }
         }
     </style>
 </head>

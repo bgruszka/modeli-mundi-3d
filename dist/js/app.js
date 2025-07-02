@@ -83,6 +83,9 @@ class UniverseExplorer {
         // Initialize button states
         this.updateButtonStates();
         
+        // Auto-collapse panels on mobile devices
+        this.checkMobileAndCollapsePanels();
+        
         // Hide loading screen
         document.getElementById('loading').style.display = 'none';
     }
@@ -685,6 +688,58 @@ class UniverseExplorer {
                 }
             }
         });
+    }
+
+    /**
+     * Check if on mobile device and auto-collapse panels for better UX
+     */
+    checkMobileAndCollapsePanels() {
+        // Detect mobile device
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                         window.innerWidth <= 768 || 
+                         ('ontouchstart' in window);
+        
+        if (isMobile) {
+            console.log('Mobile device detected - auto-collapsing panels for better UX');
+            
+            // Collapse UI panel
+            const uiContent = document.getElementById('ui-content');
+            const uiPanel = document.getElementById('ui-panel');
+            const toggleUiBtn = document.getElementById('toggle-ui-panel');
+            
+            if (uiContent && uiPanel && toggleUiBtn) {
+                uiContent.classList.add('collapsed');
+                uiPanel.classList.add('collapsed');
+                toggleUiBtn.classList.add('active');
+                toggleUiBtn.textContent = '📖';
+                toggleUiBtn.title = 'Show model selection panel';
+            }
+            
+            // Collapse controls panel
+            const controlsContent = document.getElementById('controls-content');
+            const controlsPanel = document.getElementById('lighting-controls');
+            const toggleControlsBtn = document.getElementById('toggle-controls-panel');
+            
+            if (controlsContent && controlsPanel && toggleControlsBtn) {
+                controlsContent.classList.add('collapsed');
+                controlsPanel.classList.add('collapsed');
+                toggleControlsBtn.classList.add('active');
+                toggleControlsBtn.textContent = '⚙️';
+                toggleControlsBtn.title = 'Show scene controls panel';
+            }
+            
+            // Also update the controls info with mobile-specific instructions
+            const controlsInfo = document.getElementById('controls-info');
+            if (controlsInfo) {
+                controlsInfo.innerHTML = `
+                    <strong>Mobile Controls:</strong><br>
+                    • Drag: Rotate view<br>
+                    • Pinch: Zoom in/out<br>
+                    • 📖: Models panel<br>
+                    • ⚙️: Controls panel
+                `;
+            }
+        }
     }
 
     /**
