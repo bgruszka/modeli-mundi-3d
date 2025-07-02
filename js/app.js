@@ -26,9 +26,9 @@ class UniverseExplorer {
             rim2: null
         };
         this.lightingSettings = {
-            ambient: 0.4,
-            sun: 2.0,
-            rim: 0.3
+            ambient: 0.15,  // Lower ambient for better day/night contrast
+            sun: 2.5,       // Higher sun intensity  
+            rim: 0.2        // Lower rim light to not wash out shadows
         };
         
         // Visual element toggles
@@ -123,14 +123,14 @@ class UniverseExplorer {
         this.lights.ambient = new THREE.AmbientLight(0x404040, this.lightingSettings.ambient);
         this.scene.add(this.lights.ambient);
 
-        // Main sun light (point light) - positioned slightly away from origin to avoid being inside sun objects
-        this.lights.sun = new THREE.PointLight(0xFFE4B5, this.lightingSettings.sun, 1000);
-        this.lights.sun.position.set(2, 2, 2);
+        // Main sun light (point light) - positioned to provide dramatic lighting
+        this.lights.sun = new THREE.PointLight(0xFFE4B5, this.lightingSettings.sun, 500, 2);
+        this.lights.sun.position.set(-10, 5, 10);
         this.lights.sun.castShadow = true;
         this.lights.sun.shadow.mapSize.width = 2048;
         this.lights.sun.shadow.mapSize.height = 2048;
         this.lights.sun.shadow.camera.near = 0.1;
-        this.lights.sun.shadow.camera.far = 1000;
+        this.lights.sun.shadow.camera.far = 500;
         this.scene.add(this.lights.sun);
 
         // Add light helper for debugging (initially hidden)
@@ -619,16 +619,16 @@ class UniverseExplorer {
         
         switch (preset) {
             case 'bright':
-                settings = { ambient: 0.8, sun: 2.5, rim: 0.5 };
+                settings = { ambient: 0.6, sun: 3.0, rim: 0.4 };
                 break;
             case 'dark':
-                settings = { ambient: 0.1, sun: 1.0, rim: 0.1 };
+                settings = { ambient: 0.05, sun: 1.5, rim: 0.05 };
                 break;
             case 'realistic':
-                settings = { ambient: 0.3, sun: 1.8, rim: 0.2 };
+                settings = { ambient: 0.15, sun: 2.5, rim: 0.2 };
                 break;
             case 'dramatic':
-                settings = { ambient: 0.2, sun: 3.0, rim: 0.8 };
+                settings = { ambient: 0.05, sun: 4.0, rim: 0.5 };
                 break;
             default:
                 return;
@@ -641,7 +641,7 @@ class UniverseExplorer {
      * Reset lighting to default values
      */
     resetLighting() {
-        const defaultSettings = { ambient: 0.4, sun: 2.0, rim: 0.3 };
+        const defaultSettings = { ambient: 0.15, sun: 2.5, rim: 0.2 };
         this.updateLightingFromSettings(defaultSettings);
         
         // Also reset animation speed
@@ -1214,19 +1214,21 @@ class UniverseExplorer {
                     emissiveIntensity: 0.3
                 });
             } else {
-                // Regular planets and moons
+                // Regular planets and moons - enhanced for better lighting
                 material = new THREE.MeshPhongMaterial({ 
                     map: texture,
-                    shininess: name.toLowerCase() === 'europa' || name.toLowerCase() === 'callisto' ? 100 : 30,
+                    shininess: name.toLowerCase() === 'europa' || name.toLowerCase() === 'callisto' ? 100 : 5,
+                    specular: 0x222222,  // Low specular reflection for realistic look
                     // Add subtle base color that blends with texture
-                    color: new THREE.Color(color).multiplyScalar(0.8)
+                    color: new THREE.Color(color).multiplyScalar(0.9)
                 });
             }
         } else {
-            // Fallback to solid color if no texture
+            // Fallback to solid color if no texture - enhanced for better lighting
             material = new THREE.MeshPhongMaterial({ 
                 color: color,
-                shininess: 30
+                shininess: 5,
+                specular: 0x222222  // Low specular for realistic planetary surfaces
             });
         }
         
