@@ -2,6 +2,8 @@
 
 An interactive web application that visualizes different historical models of the cosmos using Three.js. Explore how humanity's understanding of the universe evolved from ancient times to the early modern period.
 
+**NEW: Now available as an Android app!** 📱
+
 ## Features
 
 ### 🌌 Historical Models Included
@@ -43,6 +45,7 @@ An interactive web application that visualizes different historical models of th
 - **JavaScript (ES6+)** - Application logic and interactivity
 - **Three.js** - 3D graphics and animations
 - **WebGL** - Hardware-accelerated rendering
+- **Capacitor** - Native mobile app compilation
 
 ## Getting Started
 
@@ -76,6 +79,45 @@ Then open http://localhost:8000 in your browser.
 **Method 3: Direct file access**
 Simply open `index.html` in your web browser (may have limitations with some browsers due to CORS policies).
 
+## 📱 Android App Compilation
+
+### Quick Start
+To compile this web app to an Android APK:
+
+```bash
+# Install dependencies
+npm install
+
+# Build for Android
+./build-android.sh
+```
+
+### Development Workflow
+```bash
+# Build web assets
+npm run build
+
+# Sync with Android
+npm run android:build
+
+# Open in Android Studio
+npm run android:open
+
+# Run on device/emulator
+npm run android:run
+```
+
+### Google Play Store Deployment
+For complete instructions on building release APKs and deploying to Google Play Store, see **[ANDROID_DEPLOYMENT.md](ANDROID_DEPLOYMENT.md)**.
+
+The setup includes:
+- ✅ Capacitor configuration for Android
+- ✅ App icons for all Android densities
+- ✅ Optimized Android manifest
+- ✅ Production build configuration
+- ✅ Google Play Store assets
+- ✅ Comprehensive deployment guide
+
 ### File Structure
 ```
 /
@@ -84,6 +126,13 @@ Simply open `index.html` in your web browser (may have limitations with some bro
 ├── start_server.py     # Python server script
 ├── js/
 │   └── app.js         # Main JavaScript application
+├── android/           # Native Android project (auto-generated)
+├── capacitor.config.ts # Capacitor configuration
+├── build-android.sh   # Automated build script
+├── generate-icons.sh  # Icon generation script
+├── app-icon.svg       # Source app icon
+├── play-store-assets/ # Google Play Store graphics
+├── ANDROID_DEPLOYMENT.md # Complete deployment guide
 └── README.md          # Documentation
 ```
 
@@ -147,6 +196,11 @@ The application follows a modular, object-oriented design:
 - Safari 11+
 - Edge 79+
 
+### Android Compatibility
+- Android 5.0+ (API level 21)
+- OpenGL ES 2.0 support
+- WebGL-enabled WebView
+
 ## Development
 
 ### Adding New Models
@@ -178,19 +232,22 @@ This project is open source and available under the MIT License.
 - Ancient and medieval astronomers for their groundbreaking work
 - The Three.js community for excellent documentation
 - Historical astronomy resources for accurate model representations
+- Capacitor team for enabling easy web-to-mobile conversion
 
 ## Future Enhancements
 
 Potential improvements could include:
 - Additional historical models (Chinese, Islamic astronomy)
 - ~~More detailed planetary textures~~ ✅ **COMPLETED**
+- ~~Android/iOS mobile app~~ ✅ **ANDROID COMPLETED**
 - Sound effects and background music
 - Advanced physics simulations
 - Normal/bump mapping for surface details
 - Animated atmospheric effects for gas giants
 - VR/AR support
 - Multi-language support
+- iOS app compilation
 
 ---
 
-*Explore the cosmos through the eyes of history!* 🌟
+*Explore the cosmos through the eyes of history!* 🌟📱
