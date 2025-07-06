@@ -1290,7 +1290,7 @@ class UniverseExplorer {
      * Clear current model from scene
      */
     clearScene() {
-        // Remove all celestial bodies
+        // Remove all celestial bodies and their associated objects
         Object.values(this.celestialBodies).forEach(body => {
             if (body.object) {
                 this.scene.remove(body.object);
@@ -1304,6 +1304,16 @@ class UniverseExplorer {
             if (body.epicycle) {
                 this.scene.remove(body.epicycle);
             }
+
+
+        });
+        
+        // Remove all tracked visual elements (orbits, wireframes, etc.)
+        this.visualElements.orbitObjects.forEach(obj => {
+            this.scene.remove(obj);
+        });
+        this.visualElements.wireframeObjects.forEach(obj => {
+            this.scene.remove(obj);
         });
         
         // Clear visual element tracking arrays
@@ -1346,11 +1356,11 @@ class UniverseExplorer {
      * Create Aristotle's geocentric model with crystalline spheres
      */
     createAristotleModel() {
-        // Earth at center
+        // Earth at center - larger and more prominent
         const earth = this.createCelestialBody('Earth', 3, 0x4a90e2, 0, 0, 0);
         this.celestialBodies.earth = { object: earth };
 
-        // Crystalline spheres (transparent wireframes)
+        // Crystalline spheres (transparent wireframes with enhanced visibility)
         const sphereRadii = [8, 12, 18, 25, 35, 45, 60];
         const sphereNames = ['Moon', 'Mercury', 'Venus', 'Sun', 'Mars', 'Jupiter', 'Saturn'];
         const sphereColors = [0xc0c0c0, 0x8c7853, 0xffc649, 0xffd700, 0xff6347, 0xdaa520, 0xf4a460];
@@ -1359,17 +1369,29 @@ class UniverseExplorer {
             const radius = sphereRadii[i];
             const color = sphereColors[i];
 
-            // Create crystalline sphere
+            // Create crystalline sphere with enhanced visibility
             const sphereGeometry = new THREE.SphereGeometry(radius, 32, 32);
             const sphereMaterial = new THREE.MeshBasicMaterial({
-                color: 0x333333,
+                color: color,
                 wireframe: true,
                 transparent: true,
-                opacity: 0.2
+                opacity: 0.15
             });
             const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
             this.scene.add(sphere);
             this.addWireframeToTracking(sphere);
+
+            // Add subtle glow effect for crystalline spheres
+            const glowGeometry = new THREE.SphereGeometry(radius * 1.02, 16, 16);
+            const glowMaterial = new THREE.MeshBasicMaterial({
+                color: color,
+                transparent: true,
+                opacity: 0.05,
+                side: THREE.BackSide
+            });
+            const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+            this.scene.add(glow);
+            this.addWireframeToTracking(glow);
 
             // Create celestial body on sphere
             const bodySize = name === 'Sun' ? 2.5 : (name === 'Moon' ? 1 : 1.5);
@@ -1381,17 +1403,40 @@ class UniverseExplorer {
             };
         });
 
-        // Fixed stars sphere
+        // Fixed stars sphere with enhanced star pattern
         const starsGeometry = new THREE.SphereGeometry(80, 32, 32);
         const starsMaterial = new THREE.MeshBasicMaterial({
             color: 0xffffff,
             wireframe: true,
             transparent: true,
-            opacity: 0.1
+            opacity: 0.08
         });
         const starsSphere = new THREE.Mesh(starsGeometry, starsMaterial);
         this.scene.add(starsSphere);
         this.addWireframeToTracking(starsSphere);
+
+        // Add some individual "fixed stars" as points
+        const starPoints = [];
+        for (let i = 0; i < 200; i++) {
+            const phi = Math.random() * Math.PI * 2;
+            const theta = Math.random() * Math.PI;
+            const radius = 79;
+            starPoints.push(new THREE.Vector3(
+                radius * Math.sin(theta) * Math.cos(phi),
+                radius * Math.cos(theta),
+                radius * Math.sin(theta) * Math.sin(phi)
+            ));
+        }
+        const starPointsGeometry = new THREE.BufferGeometry().setFromPoints(starPoints);
+        const starPointsMaterial = new THREE.PointsMaterial({
+            color: 0xffffff,
+            size: 0.5,
+            transparent: true,
+            opacity: 0.6
+        });
+        const starPointsCloud = new THREE.Points(starPointsGeometry, starPointsMaterial);
+        this.scene.add(starPointsCloud);
+        this.addWireframeToTracking(starPointsCloud);
     }
 
     /**
@@ -1414,7 +1459,7 @@ class UniverseExplorer {
         ];
 
         planets.forEach(planet => {
-            // Main orbit
+            // Main orbit ring
             const orbitGeometry = new THREE.RingGeometry(planet.distance - 0.2, planet.distance + 0.2, 64);
             const orbitMaterial = new THREE.MeshBasicMaterial({
                 color: 0x444444,
@@ -1441,6 +1486,7 @@ class UniverseExplorer {
 
             // Epicycle circle for planets that have them
             if (planet.epicycleRadius > 0) {
+                // Epicycle ring
                 const epicycleGeometry = new THREE.RingGeometry(
                     planet.epicycleRadius - 0.1, 
                     planet.epicycleRadius + 0.1, 
@@ -1462,12 +1508,24 @@ class UniverseExplorer {
     }
 
     /**
-     * Create Copernican heliocentric model
+     * Create Copernican heliocentric model with enhanced geometric clarity
      */
     createCopernicanModel() {
-        // Sun at center
+        // Sun at center with enhanced glow effect
         const sun = this.createCelestialBody('Sun', 3, 0xffd700, 0, 0, 0);
         this.celestialBodies.sun = { object: sun };
+
+        // Add subtle glow around sun
+        const sunGlowGeometry = new THREE.SphereGeometry(4, 16, 16);
+        const sunGlowMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffd700,
+            transparent: true,
+            opacity: 0.1,
+            side: THREE.BackSide
+        });
+        const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+        this.scene.add(sunGlow);
+        this.addWireframeToTracking(sunGlow);
 
         // Planets in heliocentric order
         const planets = [
@@ -1480,12 +1538,12 @@ class UniverseExplorer {
         ];
 
         planets.forEach(planet => {
-            // Orbit
+            // Orbit ring with planet-specific color
             const orbitGeometry = new THREE.RingGeometry(planet.distance - 0.3, planet.distance + 0.3, 64);
             const orbitMaterial = new THREE.MeshBasicMaterial({
-                color: 0x555555,
+                color: planet.color,
                 transparent: true,
-                opacity: 0.3,
+                opacity: 0.25,
                 side: THREE.DoubleSide
             });
             const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
@@ -1502,11 +1560,25 @@ class UniverseExplorer {
                 speed: planet.speed
             };
 
-            // Moon for Earth
+            // Moon for Earth with its own orbit ring
             if (planet.name === 'Earth') {
+                // Moon's orbit ring
+                const moonOrbitGeometry = new THREE.RingGeometry(2.8, 3.2, 32);
+                const moonOrbitMaterial = new THREE.MeshBasicMaterial({
+                    color: 0xc0c0c0,
+                    transparent: true,
+                    opacity: 0.3,
+                    side: THREE.DoubleSide
+                });
+                const moonOrbit = new THREE.Mesh(moonOrbitGeometry, moonOrbitMaterial);
+                moonOrbit.rotation.x = Math.PI / 2;
+                this.scene.add(moonOrbit);
+                this.addOrbitToTracking(moonOrbit);
+
                 const moon = this.createCelestialBody('Moon', 0.5, 0xc0c0c0, planet.distance + 3, 0, 0);
                 this.celestialBodies.moon = {
                     object: moon,
+                    orbit: moonOrbit,
                     distance: 3,
                     speed: 4,
                     parent: 'earth'
@@ -1558,7 +1630,7 @@ class UniverseExplorer {
     }
 
     /**
-     * Create Kepler's model with elliptical orbits
+     * Create Kepler's model with elliptical orbits and focus points
      */
     createKeplerModel() {
         // Sun at center (slightly off-center for ellipses)
@@ -1576,34 +1648,111 @@ class UniverseExplorer {
         ];
 
         planets.forEach(planet => {
+            // Calculate focus positions for ellipse
+            const c = planet.a * planet.e; // Distance from center to focus
+            const focus1 = new THREE.Vector3(-c, 0, 0); // Sun is at one focus
+            const focus2 = new THREE.Vector3(c, 0, 0);   // Empty focus
+
             // Create elliptical orbit path
             const orbitPoints = [];
             const segments = 100;
             for (let i = 0; i <= segments; i++) {
                 const theta = (i / segments) * Math.PI * 2;
                 const r = planet.a * (1 - planet.e * planet.e) / (1 + planet.e * Math.cos(theta));
-                orbitPoints.push(new THREE.Vector3(r * Math.cos(theta), 0, r * Math.sin(theta)));
+                orbitPoints.push(new THREE.Vector3(r * Math.cos(theta) - c, 0, r * Math.sin(theta)));
             }
             
             const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
             const orbitMaterial = new THREE.LineBasicMaterial({
-                color: 0x666666,
+                color: planet.color,
                 transparent: true,
-                opacity: 0.4
+                opacity: 0.5
             });
             const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
             this.scene.add(orbit);
             this.addOrbitToTracking(orbit);
 
+            // Add focus point markers (only for planets with significant eccentricity)
+            if (planet.e > 0.05) {
+                // Empty focus point
+                const focusGeometry = new THREE.SphereGeometry(0.3, 8, 8);
+                const focusMaterial = new THREE.MeshBasicMaterial({
+                    color: planet.color,
+                    transparent: true,
+                    opacity: 0.7
+                });
+                const focusPoint = new THREE.Mesh(focusGeometry, focusMaterial);
+                focusPoint.position.copy(focus2);
+                this.scene.add(focusPoint);
+                this.addWireframeToTracking(focusPoint);
+
+                // Add small cross to mark the focus
+                const crossGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-0.5, 0, 0),
+                    new THREE.Vector3(0.5, 0, 0)
+                ]);
+                const crossMaterial = new THREE.LineBasicMaterial({
+                    color: planet.color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const cross1 = new THREE.Line(crossGeometry, crossMaterial);
+                cross1.position.copy(focus2);
+                this.scene.add(cross1);
+                this.addWireframeToTracking(cross1);
+
+                const crossGeometry2 = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, 0, -0.5),
+                    new THREE.Vector3(0, 0, 0.5)
+                ]);
+                const cross2 = new THREE.Line(crossGeometry2, crossMaterial);
+                cross2.position.copy(focus2);
+                this.scene.add(cross2);
+                this.addWireframeToTracking(cross2);
+            }
+
+            // Add major and minor axis lines for more eccentric orbits (only for Mercury and Mars)
+            if (planet.e > 0.08) {
+                // Major axis
+                const majorAxisGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-planet.a - c, 0, 0),
+                    new THREE.Vector3(planet.a - c, 0, 0)
+                ]);
+                const majorAxisMaterial = new THREE.LineBasicMaterial({
+                    color: planet.color,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const majorAxis = new THREE.Line(majorAxisGeometry, majorAxisMaterial);
+                this.scene.add(majorAxis);
+                this.addOrbitToTracking(majorAxis);
+
+                // Minor axis
+                const b = planet.a * Math.sqrt(1 - planet.e * planet.e);
+                const minorAxisGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-c, 0, -b),
+                    new THREE.Vector3(-c, 0, b)
+                ]);
+                const minorAxisMaterial = new THREE.LineBasicMaterial({
+                    color: planet.color,
+                    transparent: true,
+                    opacity: 0.2
+                });
+                const minorAxis = new THREE.Line(minorAxisGeometry, minorAxisMaterial);
+                this.scene.add(minorAxis);
+                this.addOrbitToTracking(minorAxis);
+            }
+
             // Planet
-            const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.a, 0, 0);
+            const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.a - c, 0, 0);
             this.celestialBodies[planet.name.toLowerCase()] = {
                 object: body,
                 orbit: orbit,
                 semiMajorAxis: planet.a,
                 eccentricity: planet.e,
                 speed: planet.speed,
-                angle: Math.random() * Math.PI * 2
+                angle: Math.random() * Math.PI * 2,
+                focusOffset: c // Store focus offset for animation
             };
         });
 
@@ -1788,7 +1937,8 @@ class UniverseExplorer {
                 body.angle += body.speed * 0.01 * this.animationSpeed;
                 const r = body.semiMajorAxis * (1 - body.eccentricity * body.eccentricity) / 
                          (1 + body.eccentricity * Math.cos(body.angle));
-                const x = r * Math.cos(body.angle);
+                const c = body.focusOffset || 0;
+                const x = r * Math.cos(body.angle) - c;
                 const z = r * Math.sin(body.angle);
                 body.object.position.set(x, 0, z);
             } else if (body.distance !== undefined) {
