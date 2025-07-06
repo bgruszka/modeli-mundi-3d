@@ -75,7 +75,50 @@ class UniverseExplorer {
             },
             newtonian: {
                 title: "Newtonian Gravitational Model",
-                description: "Advanced heliocentric model incorporating Newton's law of universal gravitation. Features elliptical orbits with visible gravitational force interactions between celestial bodies, demonstrating how mass and distance affect orbital mechanics."
+                description: `Advanced heliocentric model incorporating Newton's law of universal gravitation with comprehensive physics simulation and interactive features.
+
+<strong>🔴 Gravitational Force Visualizations:</strong>
+• Red force lines from Sun to major planets (stronger forces = brighter lines)
+• Gray interplanetary force lines between major planets
+• Dynamic opacity based on distance (closer objects = stronger gravitational pull)
+
+<strong>🟢 Enhanced Orbital Mechanics:</strong>
+• Realistic elliptical orbits with accurate eccentricity values
+• Green velocity vectors at perihelion (closest point to Sun - faster orbital speed)
+• Blue velocity vectors at aphelion (farthest point from Sun - slower orbital speed)
+• Focus point markers showing the two foci of each elliptical orbit
+
+<strong>🔵 Gravitational Influence Spheres:</strong>
+• Transparent blue spheres around massive planets (Jupiter, Saturn, Earth, Mars)
+• Sphere size represents gravitational influence radius
+• Demonstrates how planet mass affects surrounding space
+
+<strong>🟤 Asteroid Belt Simulation:</strong>
+• 30 asteroids orbiting between Mars and Jupiter
+• Each asteroid experiences gravitational perturbations from nearby planets
+• Demonstrates how planetary gravity affects smaller bodies
+
+<strong>⚖️ Mass-Based Physics:</strong>
+• Realistic relative masses for all celestial bodies
+• Gravitational force strength depends on both mass and distance
+• Proper orbital speeds based on mass and orbital radius
+
+<strong>💥 Interactive Collision System:</strong>
+• Toggle gravity off (🚀 No Gravity) to see planets fly in straight lines
+• Realistic collision detection between all objects
+• Two collision outcomes:
+  - Planet Merging: Similar masses → bright flash + larger combined planet
+  - Explosive Fragmentation: Different masses → particle explosion + debris field
+• Conservation of momentum and mass in all collisions
+• Explosion particles with realistic physics (gravity effects, fade over time)
+
+<strong>🎮 Interactive Features:</strong>
+• Gravity Toggle: Enable/disable gravitational forces
+• Watch how gravity keeps solar systems stable
+• Observe collision dynamics when gravity is removed
+• Educational demonstration of Newton's laws of motion and universal gravitation
+
+This model demonstrates the fundamental principles that govern our solar system and provides an interactive laboratory for exploring gravitational physics.`
             }
         };
 
