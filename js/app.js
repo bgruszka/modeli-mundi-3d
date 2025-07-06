@@ -41,6 +41,13 @@ class UniverseExplorer {
             starField: null
         };
         
+        // Newtonian model specific properties
+        this.newtonianModel = {
+            gravityEnabled: true,
+            planetVelocities: {}, // Store velocity vectors for straight-line motion
+            gravitationalForces: [] // Store force objects for easy toggle
+        };
+        
         // Model descriptions
         this.modelInfo = {
             aristotle: {
@@ -502,6 +509,11 @@ class UniverseExplorer {
 
         // Set up mobile-friendly tooltips
         this.setupMobileTooltips();
+        
+        // Gravity toggle button (for Newtonian model)
+        document.getElementById('gravity-btn').addEventListener('click', () => {
+            this.toggleGravity();
+        });
 
         // Set up collapsible panels
         this.setupCollapsiblePanels();
@@ -1183,6 +1195,80 @@ class UniverseExplorer {
     }
 
     /**
+     * Toggle gravity for Newtonian model
+     */
+    toggleGravity() {
+        if (this.currentModel !== 'newtonian') return;
+        
+        this.newtonianModel.gravityEnabled = !this.newtonianModel.gravityEnabled;
+        
+        // Update button appearance
+        const gravityBtn = document.getElementById('gravity-btn');
+        if (gravityBtn) {
+            gravityBtn.classList.toggle('active', this.newtonianModel.gravityEnabled);
+            gravityBtn.textContent = this.newtonianModel.gravityEnabled ? '🌍 Gravity' : '🚀 No Gravity';
+        }
+        
+        // Show/hide gravitational force visualizations
+        this.updateGravitationalForceVisibility();
+        
+        // Calculate initial velocities for straight-line motion when gravity is turned off
+        if (!this.newtonianModel.gravityEnabled) {
+            this.calculateStraightLineVelocities();
+        }
+        
+        // Show toast notification
+        this.showToast(
+            this.newtonianModel.gravityEnabled ? 
+            '🌍 Gravity enabled - Planets follow elliptical orbits' : 
+            '🚀 Gravity disabled - Planets move in straight lines'
+        );
+    }
+
+    /**
+     * Update visibility of gravitational force visualizations
+     */
+    updateGravitationalForceVisibility() {
+        if (this.newtonianModel.gravitationalForces) {
+            this.newtonianModel.gravitationalForces.forEach(force => {
+                if (force.line) {
+                    force.line.visible = this.newtonianModel.gravityEnabled;
+                }
+                if (force.influence) {
+                    force.influence.visible = this.newtonianModel.gravityEnabled;
+                }
+            });
+        }
+    }
+
+    /**
+     * Calculate initial velocities for straight-line motion
+     */
+    calculateStraightLineVelocities() {
+        Object.entries(this.celestialBodies).forEach(([name, body]) => {
+            if (body.object && body.semiMajorAxis) {
+                // Calculate tangential velocity based on current position
+                const currentAngle = body.angle || 0;
+                const angularVelocity = body.speed * 0.01;
+                
+                // Calculate velocity vector (tangent to orbit)
+                const velocityX = -Math.sin(currentAngle) * angularVelocity * body.semiMajorAxis;
+                const velocityZ = Math.cos(currentAngle) * angularVelocity * body.semiMajorAxis;
+                
+                this.newtonianModel.planetVelocities[name] = {
+                    x: velocityX,
+                    z: velocityZ,
+                    initialPosition: {
+                        x: body.object.position.x,
+                        z: body.object.position.z
+                    },
+                    timeWhenGravityDisabled: this.time
+                };
+            }
+        });
+    }
+
+    /**
      * Debug mode to identify scene objects (non-destructive)
      */
     toggleDebugMode() {
@@ -1274,6 +1360,22 @@ class UniverseExplorer {
             <p>${info.description}</p>
         `;
 
+        // Show/hide gravity button based on model
+        const gravityBtn = document.getElementById('gravity-btn');
+        if (gravityBtn) {
+            if (modelName === 'newtonian') {
+                gravityBtn.style.display = 'inline-block';
+                gravityBtn.classList.add('active');
+                gravityBtn.textContent = '🌍 Gravity';
+            } else {
+                gravityBtn.style.display = 'none';
+                // Reset Newtonian model properties when switching away
+                this.newtonianModel.gravityEnabled = true;
+                this.newtonianModel.planetVelocities = {};
+                this.newtonianModel.gravitationalForces = [];
+            }
+        }
+
         // Show mobile feedback
         if (window.innerWidth <= 768) {
             const modelNames = {
@@ -1281,7 +1383,8 @@ class UniverseExplorer {
                 ptolemaic: "Ptolemaic Model", 
                 copernican: "Copernican Model",
                 galilean: "Galilean Model",
-                kepler: "Kepler's Model"
+                kepler: "Kepler's Model",
+                newtonian: "Newtonian Model"
             };
             this.showToast(`${modelNames[modelName]} loaded`);
         }
@@ -1807,8 +1910,10 @@ class UniverseExplorer {
             { name: 'Saturn', a: 65, e: 0.054, size: 2.2, color: 0xf4a460, speed: 0.3, mass: 57 }
         ];
 
-        // Create gravitational force lines array
-        this.gravitationalForces = [];
+        // Reset Newtonian model properties
+        this.newtonianModel.gravityEnabled = true;
+        this.newtonianModel.planetVelocities = {};
+        this.newtonianModel.gravitationalForces = [];
 
         planets.forEach(planet => {
             // Calculate focus positions for ellipse
@@ -1850,7 +1955,7 @@ class UniverseExplorer {
                 const forceLine = new THREE.Line(forceGeometry, forceMaterial);
                 this.scene.add(forceLine);
                 this.addWireframeToTracking(forceLine);
-                this.gravitationalForces.push({
+                this.newtonianModel.gravitationalForces.push({
                     line: forceLine,
                     planet: planet.name.toLowerCase(),
                     strength: planet.mass / 100 // Visual strength indicator
@@ -1869,7 +1974,7 @@ class UniverseExplorer {
                 this.addWireframeToTracking(influenceSphere);
                 
                 // Store influence sphere with planet
-                this.gravitationalForces.push({
+                this.newtonianModel.gravitationalForces.push({
                     influence: influenceSphere,
                     planet: planet.name.toLowerCase(),
                     type: 'influence'
@@ -2045,7 +2150,7 @@ class UniverseExplorer {
                     this.scene.add(forceLine);
                     this.addWireframeToTracking(forceLine);
                     
-                    this.gravitationalForces.push({
+                    this.newtonianModel.gravitationalForces.push({
                         line: forceLine,
                         planet1: planet1,
                         planet2: planet2,
@@ -2223,14 +2328,26 @@ class UniverseExplorer {
                     }
                 }
             } else if (body.semiMajorAxis && body.eccentricity !== undefined) {
-                // Kepler elliptical orbit
-                body.angle += body.speed * 0.01 * this.animationSpeed;
-                const r = body.semiMajorAxis * (1 - body.eccentricity * body.eccentricity) / 
-                         (1 + body.eccentricity * Math.cos(body.angle));
-                const c = body.focusOffset || 0;
-                const x = r * Math.cos(body.angle) - c;
-                const z = r * Math.sin(body.angle);
-                body.object.position.set(x, 0, z);
+                // Check if this is Newtonian model with gravity disabled
+                if (this.currentModel === 'newtonian' && !this.newtonianModel.gravityEnabled) {
+                    // Straight-line motion (no gravity)
+                    const velocity = this.newtonianModel.planetVelocities[name];
+                    if (velocity) {
+                        const deltaTime = this.time - velocity.timeWhenGravityDisabled;
+                        const x = velocity.initialPosition.x + velocity.x * deltaTime * this.animationSpeed;
+                        const z = velocity.initialPosition.z + velocity.z * deltaTime * this.animationSpeed;
+                        body.object.position.set(x, 0, z);
+                    }
+                } else {
+                    // Kepler elliptical orbit (gravity enabled)
+                    body.angle += body.speed * 0.01 * this.animationSpeed;
+                    const r = body.semiMajorAxis * (1 - body.eccentricity * body.eccentricity) / 
+                             (1 + body.eccentricity * Math.cos(body.angle));
+                    const c = body.focusOffset || 0;
+                    const x = r * Math.cos(body.angle) - c;
+                    const z = r * Math.sin(body.angle);
+                    body.object.position.set(x, 0, z);
+                }
             } else if (body.distance !== undefined) {
                 // Circular orbit
                 let angle = this.time * body.speed;
@@ -2261,8 +2378,8 @@ class UniverseExplorer {
         });
 
         // Update gravitational force visualizations for Newtonian model
-        if (this.currentModel === 'newtonian' && this.gravitationalForces) {
-            this.gravitationalForces.forEach(force => {
+        if (this.currentModel === 'newtonian' && this.newtonianModel.gravitationalForces) {
+            this.newtonianModel.gravitationalForces.forEach(force => {
                 if (force.type === 'interplanetary') {
                     // Update interplanetary force lines
                     const planet1 = this.celestialBodies[force.planet1];
