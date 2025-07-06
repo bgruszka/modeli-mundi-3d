@@ -10,6 +10,7 @@ export class NewtonianModel extends BaseModel {
         this.gravityEnabled = true;
         this.gravitationalForces = [];
         this.planetVelocities = {};
+        this.currentTime = 0;
     }
 
     async createCelestialBodies() {
@@ -369,6 +370,10 @@ export class NewtonianModel extends BaseModel {
         });
     }
 
+    setCurrentTime(time) {
+        this.currentTime = time;
+    }
+
     setGravityEnabled(enabled) {
         this.gravityEnabled = enabled;
         
@@ -385,6 +390,9 @@ export class NewtonianModel extends BaseModel {
         // Calculate initial velocities for straight-line motion when gravity is turned off
         if (!enabled) {
             this.calculateStraightLineVelocities();
+        } else {
+            // Clear velocities when gravity is re-enabled
+            this.planetVelocities = {};
         }
     }
 
@@ -407,6 +415,25 @@ export class NewtonianModel extends BaseModel {
                     
                     velocityX = Math.cos(velocityAngle) * velocityMagnitude;
                     velocityZ = Math.sin(velocityAngle) * velocityMagnitude;
+                } else if (body.distance !== undefined) {
+                    // Handle circular orbits (moon, asteroids)
+                    const currentAngle = body.angle || (this.currentTime * body.speed);
+                    const speed = body.speed;
+                    const distance = body.distance;
+                    
+                    const angularVel = speed * 0.01;
+                    const velocityMagnitude = distance * angularVel * 20;
+                    const velocityAngle = currentAngle + Math.PI / 2;
+                    
+                    velocityX = Math.cos(velocityAngle) * velocityMagnitude;
+                    velocityZ = Math.sin(velocityAngle) * velocityMagnitude;
+                    
+                    // Add parent's velocity for moons
+                    if (body.parent && this.planetVelocities[body.parent]) {
+                        const parentVel = this.planetVelocities[body.parent];
+                        velocityX += parentVel.x;
+                        velocityZ += parentVel.z;
+                    }
                 }
                 
                 this.planetVelocities[name] = {
@@ -416,7 +443,7 @@ export class NewtonianModel extends BaseModel {
                         x: body.object.position.x,
                         z: body.object.position.z
                     },
-                    timeWhenGravityDisabled: 0 // Will be set by physics engine
+                    timeWhenGravityDisabled: this.currentTime
                 };
             }
         });
@@ -427,6 +454,10 @@ export class NewtonianModel extends BaseModel {
         // Remove old bodies
         delete this.celestialBodies[name1];
         delete this.celestialBodies[name2];
+        
+        // Remove old velocities
+        delete this.planetVelocities[name1];
+        delete this.planetVelocities[name2];
         
         // Create new merged body
         const mergedBody = this.createCelestialBody(newName.replace(/_/g, ' '), newSize, newColor, position.x, position.y, position.z);
@@ -439,7 +470,15 @@ export class NewtonianModel extends BaseModel {
         
         // Set velocity for straight-line motion
         if (!this.gravityEnabled) {
-            this.planetVelocities[newName] = velocity;
+            this.planetVelocities[newName] = {
+                x: velocity.x,
+                z: velocity.z,
+                initialPosition: {
+                    x: position.x,
+                    z: position.z
+                },
+                timeWhenGravityDisabled: velocity.timeWhenGravityDisabled || this.currentTime
+            };
         }
     }
 
@@ -447,6 +486,10 @@ export class NewtonianModel extends BaseModel {
         // Remove original bodies
         delete this.celestialBodies[name1];
         delete this.celestialBodies[name2];
+        
+        // Remove old velocities
+        delete this.planetVelocities[name1];
+        delete this.planetVelocities[name2];
         
         // Create debris fragments
         for (let i = 0; i < debrisCount; i++) {
@@ -478,7 +521,7 @@ export class NewtonianModel extends BaseModel {
                     x: baseVelX + Math.cos(scatterAngle) * scatterSpeed,
                     z: baseVelZ + Math.sin(scatterAngle) * scatterSpeed,
                     initialPosition: {x: debrisX, z: debrisZ},
-                    timeWhenGravityDisabled: 0
+                    timeWhenGravityDisabled: this.currentTime
                 };
             }
         }

@@ -8,7 +8,6 @@ export class PhysicsEngine {
         this.collisionEnabled = true;
         this.currentModel = null;
         this.explosionParticles = [];
-        this.planetVelocities = {};
     }
     
     init() {
@@ -28,7 +27,6 @@ export class PhysicsEngine {
         
         // Reset physics state when switching models
         this.explosionParticles = [];
-        this.planetVelocities = {};
     }
     
     update(time) {
@@ -52,10 +50,8 @@ export class PhysicsEngine {
             this.detectCollisions();
         }
         
-        // Calculate straight-line velocities when gravity is disabled
-        if (!this.gravityEnabled) {
-            this.calculateStraightLineVelocities(time);
-        }
+        // Let the model handle its own velocity calculations and pass time
+        this.currentModel.setCurrentTime(time);
     }
     
     detectCollisions() {
@@ -149,9 +145,10 @@ export class PhysicsEngine {
         const totalMass = mass1 + mass2;
         const newSize = Math.pow(totalMass, 1/3) * 0.8;
         
-        // Calculate merged velocity (conservation of momentum)
-        const vel1 = this.planetVelocities[name1] || {x: 0, z: 0};
-        const vel2 = this.planetVelocities[name2] || {x: 0, z: 0};
+        // Get velocities from the model
+        const modelVelocities = this.currentModel.planetVelocities || {};
+        const vel1 = modelVelocities[name1] || {x: 0, z: 0};
+        const vel2 = modelVelocities[name2] || {x: 0, z: 0};
         
         const newVelX = (vel1.x * mass1 + vel2.x * mass2) / totalMass;
         const newVelZ = (vel1.z * mass1 + vel2.z * mass2) / totalMass;
@@ -164,7 +161,8 @@ export class PhysicsEngine {
         this.currentModel.mergePlanets(name1, name2, newName, newSize, newColor, position, {
             x: newVelX,
             z: newVelZ,
-            mass: totalMass
+            mass: totalMass,
+            timeWhenGravityDisabled: this.currentModel.currentTime
         });
         
         // Create merge effect
@@ -178,9 +176,10 @@ export class PhysicsEngine {
         const size2 = this.getCelestialBodySize(body2.object);
         const debrisCount = Math.min(15, Math.floor((size1 + size2) * 2));
         
-        // Get velocities for debris scatter
-        const vel1 = this.planetVelocities[name1] || {x: 0, z: 0};
-        const vel2 = this.planetVelocities[name2] || {x: 0, z: 0};
+        // Get velocities from the model
+        const modelVelocities = this.currentModel.planetVelocities || {};
+        const vel1 = modelVelocities[name1] || {x: 0, z: 0};
+        const vel2 = modelVelocities[name2] || {x: 0, z: 0};
         
         // Let the model handle the actual explosion
         this.currentModel.explodePlanets(name1, name2, debrisCount, position, {
@@ -192,64 +191,7 @@ export class PhysicsEngine {
         this.createExplosionEffect(position);
     }
     
-    calculateStraightLineVelocities(time) {
-        if (!this.currentModel) return;
-        
-        const celestialBodies = this.currentModel.getCelestialBodies();
-        
-        Object.entries(celestialBodies).forEach(([name, body]) => {
-            if (body.object && !this.planetVelocities[name]) {
-                let velocityX = 0;
-                let velocityZ = 0;
-                
-                if (body.semiMajorAxis) {
-                    // Elliptical orbits
-                    const currentAngle = body.angle || 0;
-                    const a = body.semiMajorAxis;
-                    const e = body.eccentricity || 0;
-                    const speed = body.speed;
-                    
-                    const r = a * (1 - e * e) / (1 + e * Math.cos(currentAngle));
-                    const angularVel = speed * 0.01;
-                    const velocityMagnitude = r * angularVel * 20;
-                    const velocityAngle = currentAngle + Math.PI / 2;
-                    
-                    velocityX = Math.cos(velocityAngle) * velocityMagnitude;
-                    velocityZ = Math.sin(velocityAngle) * velocityMagnitude;
-                    
-                } else if (body.distance !== undefined) {
-                    // Circular orbits
-                    const currentAngle = body.angle || (time * body.speed);
-                    const speed = body.speed;
-                    const distance = body.distance;
-                    
-                    const angularVel = speed * 0.01;
-                    const velocityMagnitude = distance * angularVel * 20;
-                    const velocityAngle = currentAngle + Math.PI / 2;
-                    
-                    velocityX = Math.cos(velocityAngle) * velocityMagnitude;
-                    velocityZ = Math.sin(velocityAngle) * velocityMagnitude;
-                    
-                    // Add parent's velocity for moons
-                    if (body.parent && this.planetVelocities[body.parent]) {
-                        const parentVel = this.planetVelocities[body.parent];
-                        velocityX += parentVel.x;
-                        velocityZ += parentVel.z;
-                    }
-                }
-                
-                this.planetVelocities[name] = {
-                    x: velocityX,
-                    z: velocityZ,
-                    initialPosition: {
-                        x: body.object.position.x,
-                        z: body.object.position.z
-                    },
-                    timeWhenGravityDisabled: time
-                };
-            }
-        });
-    }
+
     
     createMergeEffect(position) {
         // Create bright flash
@@ -355,6 +297,5 @@ export class PhysicsEngine {
     destroy() {
         this.currentModel = null;
         this.explosionParticles = [];
-        this.planetVelocities = {};
     }
 }
