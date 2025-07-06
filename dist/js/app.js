@@ -45,7 +45,10 @@ class UniverseExplorer {
         this.newtonianModel = {
             gravityEnabled: true,
             planetVelocities: {}, // Store velocity vectors for straight-line motion
-            gravitationalForces: [] // Store force objects for easy toggle
+            gravitationalForces: [], // Store force objects for easy toggle
+            collisionEnabled: true, // Enable collision detection
+            explosionParticles: [], // Store explosion particle systems
+            mergedPlanets: [] // Track newly created merged planets
         };
         
         // Model descriptions
@@ -2335,6 +2338,311 @@ class UniverseExplorer {
                     }
                 }
             });
+        }
+
+        // Check for collisions in Newtonian model
+        if (this.currentModel === 'newtonian' && this.newtonianModel.collisionEnabled) {
+            this.detectCollisions();
+        }
+
+        // Update explosion particles
+        this.updateExplosionParticles();
+    }
+
+    /**
+     * Detect collisions between celestial bodies
+     */
+    detectCollisions() {
+        const bodies = Object.entries(this.celestialBodies);
+        
+        for (let i = 0; i < bodies.length; i++) {
+            for (let j = i + 1; j < bodies.length; j++) {
+                const [name1, body1] = bodies[i];
+                const [name2, body2] = bodies[j];
+                
+                // Skip if either body doesn't exist or is the sun
+                if (!body1.object || !body2.object || name1 === 'sun' || name2 === 'sun') continue;
+                
+                // Skip asteroids colliding with each other (too many)
+                if (name1.startsWith('asteroid') && name2.startsWith('asteroid')) continue;
+                
+                const distance = body1.object.position.distanceTo(body2.object.position);
+                const body1Size = this.getCelestialBodySize(body1.object);
+                const body2Size = this.getCelestialBodySize(body2.object);
+                const collisionDistance = body1Size + body2Size + 1; // Small buffer
+                
+                if (distance < collisionDistance) {
+                    this.handleCollision(name1, body1, name2, body2);
+                    return; // Handle one collision per frame
+                }
+            }
+        }
+    }
+
+    /**
+     * Handle collision between two celestial bodies
+     */
+    handleCollision(name1, body1, name2, body2) {
+        // Get sizes and masses
+        const size1 = this.getCelestialBodySize(body1.object);
+        const size2 = this.getCelestialBodySize(body2.object);
+        const mass1 = body1.mass || size1 * size1; // Rough mass estimate
+        const mass2 = body2.mass || size2 * size2;
+        
+        // Collision position (between the two objects)
+        const collisionPos = new THREE.Vector3()
+            .addVectors(body1.object.position, body2.object.position)
+            .multiplyScalar(0.5);
+        
+        // Determine collision type based on relative masses
+        const massRatio = Math.min(mass1, mass2) / Math.max(mass1, mass2);
+        
+        if (massRatio > 0.3 && Math.random() > 0.3) {
+            // Merge if masses are similar and random chance
+            this.mergePlanets(name1, body1, name2, body2, collisionPos);
+        } else {
+            // Explode if masses are very different or random chance
+            this.explodePlanets(name1, body1, name2, body2, collisionPos);
+        }
+        
+        // Show toast notification
+        this.showToast(`💥 ${name1} and ${name2} collided!`, 3000);
+    }
+
+    /**
+     * Merge two planets into one larger planet
+     */
+    mergePlanets(name1, body1, name2, body2, position) {
+        // Calculate merged properties
+        const size1 = this.getCelestialBodySize(body1.object);
+        const size2 = this.getCelestialBodySize(body2.object);
+        const mass1 = body1.mass || size1 * size1;
+        const mass2 = body2.mass || size2 * size2;
+        
+        const totalMass = mass1 + mass2;
+        const newSize = Math.pow(totalMass, 1/3) * 0.8; // Cube root relationship, slightly compressed
+        
+        // Calculate merged velocity (conservation of momentum)
+        let vel1 = this.newtonianModel.planetVelocities[name1] || {x: 0, z: 0};
+        let vel2 = this.newtonianModel.planetVelocities[name2] || {x: 0, z: 0};
+        
+        const newVelX = (vel1.x * mass1 + vel2.x * mass2) / totalMass;
+        const newVelZ = (vel1.z * mass1 + vel2.z * mass2) / totalMass;
+        
+        // Create new merged planet
+        const newName = `merged_${name1}_${name2}`;
+        const newColor = this.blendColors(body1.object.material.color.getHex(), body2.object.material.color.getHex());
+        
+        // Remove old bodies
+        this.removeCelestialBody(name1);
+        this.removeCelestialBody(name2);
+        
+        // Create new merged body
+        const mergedBody = this.createCelestialBody(newName.replace(/_/g, ' '), newSize, newColor, position.x, position.y, position.z);
+        
+        this.celestialBodies[newName] = {
+            object: mergedBody,
+            mass: totalMass,
+            type: 'merged'
+        };
+        
+        // Set velocity for the new merged planet
+        if (!this.newtonianModel.gravityEnabled) {
+            this.newtonianModel.planetVelocities[newName] = {
+                x: newVelX,
+                z: newVelZ,
+                initialPosition: {x: position.x, z: position.z},
+                timeWhenGravityDisabled: this.time
+            };
+        }
+        
+        // Create merge effect
+        this.createMergeEffect(position);
+        
+        console.log(`🪐 Merged ${name1} and ${name2} into ${newName}`);
+    }
+
+    /**
+     * Explode two planets into debris
+     */
+    explodePlanets(name1, body1, name2, body2, position) {
+        // Create explosion effect
+        this.createExplosionEffect(position);
+        
+        // Calculate debris properties
+        const size1 = this.getCelestialBodySize(body1.object);
+        const size2 = this.getCelestialBodySize(body2.object);
+        const debrisCount = Math.min(15, Math.floor((size1 + size2) * 2));
+        
+        // Get velocities for debris scatter
+        let vel1 = this.newtonianModel.planetVelocities[name1] || {x: 0, z: 0};
+        let vel2 = this.newtonianModel.planetVelocities[name2] || {x: 0, z: 0};
+        
+        // Remove original bodies
+        this.removeCelestialBody(name1);
+        this.removeCelestialBody(name2);
+        
+        // Create debris fragments
+        for (let i = 0; i < debrisCount; i++) {
+            const debrisName = `debris_${name1}_${name2}_${i}`;
+            const debrisSize = 0.3 + Math.random() * 0.8;
+            const debrisColor = Math.random() > 0.5 ? body1.object.material.color.getHex() : body2.object.material.color.getHex();
+            
+            // Random position around collision point
+            const angle = (i / debrisCount) * Math.PI * 2 + (Math.random() - 0.5) * 0.5;
+            const distance = 1 + Math.random() * 3;
+            const debrisX = position.x + Math.cos(angle) * distance;
+            const debrisZ = position.z + Math.sin(angle) * distance;
+            
+            const debris = this.createCelestialBody(`Debris ${i+1}`, debrisSize, debrisColor, debrisX, position.y, debrisZ);
+            
+            this.celestialBodies[debrisName] = {
+                object: debris,
+                mass: debrisSize * debrisSize,
+                type: 'debris'
+            };
+            
+            // Set random scatter velocity
+            if (!this.newtonianModel.gravityEnabled) {
+                const scatterSpeed = 5 + Math.random() * 10;
+                const scatterAngle = angle + (Math.random() - 0.5) * Math.PI;
+                const baseVelX = (vel1.x + vel2.x) * 0.5;
+                const baseVelZ = (vel1.z + vel2.z) * 0.5;
+                
+                this.newtonianModel.planetVelocities[debrisName] = {
+                    x: baseVelX + Math.cos(scatterAngle) * scatterSpeed,
+                    z: baseVelZ + Math.sin(scatterAngle) * scatterSpeed,
+                    initialPosition: {x: debrisX, z: debrisZ},
+                    timeWhenGravityDisabled: this.time
+                };
+            }
+        }
+        
+        console.log(`💥 Exploded ${name1} and ${name2} into ${debrisCount} debris fragments`);
+    }
+
+    /**
+     * Remove a celestial body from the scene
+     */
+    removeCelestialBody(name) {
+        const body = this.celestialBodies[name];
+        if (body) {
+            if (body.object) this.scene.remove(body.object);
+            if (body.orbit) this.scene.remove(body.orbit);
+            delete this.celestialBodies[name];
+            if (this.newtonianModel.planetVelocities[name]) {
+                delete this.newtonianModel.planetVelocities[name];
+            }
+        }
+    }
+
+    /**
+     * Get the size of a celestial body
+     */
+    getCelestialBodySize(object) {
+        return object.geometry.parameters.radius || 1;
+    }
+
+    /**
+     * Blend two colors together
+     */
+    blendColors(color1, color2) {
+        const c1 = new THREE.Color(color1);
+        const c2 = new THREE.Color(color2);
+        return c1.lerp(c2, 0.5).getHex();
+    }
+
+    /**
+     * Create merge effect
+     */
+    createMergeEffect(position) {
+        // Create bright flash
+        const flashGeometry = new THREE.SphereGeometry(5, 16, 16);
+        const flashMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            transparent: true,
+            opacity: 0.8
+        });
+        const flash = new THREE.Mesh(flashGeometry, flashMaterial);
+        flash.position.copy(position);
+        this.scene.add(flash);
+        
+        // Animate flash fade out
+        const fadeOut = () => {
+            flash.material.opacity -= 0.05;
+            flash.scale.multiplyScalar(1.1);
+            if (flash.material.opacity > 0) {
+                requestAnimationFrame(fadeOut);
+            } else {
+                this.scene.remove(flash);
+            }
+        };
+        fadeOut();
+    }
+
+    /**
+     * Create explosion effect with particles
+     */
+    createExplosionEffect(position) {
+        // Create explosion particles
+        const particleCount = 30;
+        const particles = [];
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particleGeometry = new THREE.SphereGeometry(0.1 + Math.random() * 0.2, 4, 4);
+            const particleMaterial = new THREE.MeshBasicMaterial({
+                color: new THREE.Color().setHSL(Math.random() * 0.1, 1, 0.5 + Math.random() * 0.5), // Orange/red
+                transparent: true,
+                opacity: 0.8
+            });
+            const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+            
+            particle.position.copy(position);
+            
+            // Random velocity
+            const speed = 5 + Math.random() * 10;
+            const angle = Math.random() * Math.PI * 2;
+            const elevation = (Math.random() - 0.5) * Math.PI * 0.5;
+            
+            particle.userData = {
+                velocity: new THREE.Vector3(
+                    Math.cos(angle) * Math.cos(elevation) * speed,
+                    Math.sin(elevation) * speed,
+                    Math.sin(angle) * Math.cos(elevation) * speed
+                ),
+                life: 1.0,
+                decay: 0.02 + Math.random() * 0.03
+            };
+            
+            particles.push(particle);
+            this.scene.add(particle);
+        }
+        
+        this.newtonianModel.explosionParticles.push(...particles);
+    }
+
+    /**
+     * Update explosion particles
+     */
+    updateExplosionParticles() {
+        for (let i = this.newtonianModel.explosionParticles.length - 1; i >= 0; i--) {
+            const particle = this.newtonianModel.explosionParticles[i];
+            
+            // Update position
+            particle.position.add(particle.userData.velocity.clone().multiplyScalar(0.1));
+            
+            // Apply gravity to particles (make them fall)
+            particle.userData.velocity.y -= 0.2;
+            
+            // Update life
+            particle.userData.life -= particle.userData.decay;
+            particle.material.opacity = particle.userData.life;
+            
+            // Remove dead particles
+            if (particle.userData.life <= 0) {
+                this.scene.remove(particle);
+                this.newtonianModel.explosionParticles.splice(i, 1);
+            }
         }
     }
 
