@@ -1246,14 +1246,55 @@ class UniverseExplorer {
      */
     calculateStraightLineVelocities() {
         Object.entries(this.celestialBodies).forEach(([name, body]) => {
-            if (body.object && body.semiMajorAxis) {
-                // Calculate tangential velocity based on current position
-                const currentAngle = body.angle || 0;
-                const angularVelocity = body.speed * 0.01;
+            if (body.object) {
+                let velocityX = 0;
+                let velocityZ = 0;
                 
-                // Calculate velocity vector (tangent to orbit)
-                const velocityX = -Math.sin(currentAngle) * angularVelocity * body.semiMajorAxis;
-                const velocityZ = Math.cos(currentAngle) * angularVelocity * body.semiMajorAxis;
+                if (body.semiMajorAxis) {
+                    // Planets with elliptical orbits
+                    const currentAngle = body.angle || 0;
+                    const a = body.semiMajorAxis;
+                    const e = body.eccentricity || 0;
+                    const speed = body.speed;
+                    
+                    // Current distance from focus (sun)
+                    const r = a * (1 - e * e) / (1 + e * Math.cos(currentAngle));
+                    
+                    // Angular velocity at current position (varies in elliptical orbit)
+                    const angularVel = speed * 0.01 * this.animationSpeed;
+                    
+                    // Tangential velocity magnitude (v = r * ω for the tangential component)
+                    const velocityMagnitude = r * angularVel * 20; // Scale factor for visible motion
+                    
+                    // Calculate velocity direction (perpendicular to radius vector from sun)
+                    // For elliptical orbit, velocity direction is tangent to the ellipse
+                    const velocityAngle = currentAngle + Math.PI / 2; // Perpendicular to radius
+                    
+                    velocityX = Math.cos(velocityAngle) * velocityMagnitude;
+                    velocityZ = Math.sin(velocityAngle) * velocityMagnitude;
+                    
+                } else if (body.distance !== undefined) {
+                    // Circular orbits (moons, asteroids)
+                    const currentAngle = body.angle || (this.time * body.speed);
+                    const speed = body.speed;
+                    const distance = body.distance;
+                    
+                    // For circular motion: v = ω * r
+                    const angularVel = speed * 0.01 * this.animationSpeed;
+                    const velocityMagnitude = distance * angularVel * 20;
+                    
+                    // Velocity is perpendicular to radius
+                    const velocityAngle = currentAngle + Math.PI / 2;
+                    velocityX = Math.cos(velocityAngle) * velocityMagnitude;
+                    velocityZ = Math.sin(velocityAngle) * velocityMagnitude;
+                    
+                    // For moons orbiting planets, add parent's velocity
+                    if (body.parent && this.newtonianModel.planetVelocities[body.parent]) {
+                        const parentVel = this.newtonianModel.planetVelocities[body.parent];
+                        velocityX += parentVel.x;
+                        velocityZ += parentVel.z;
+                    }
+                }
                 
                 this.newtonianModel.planetVelocities[name] = {
                     x: velocityX,
@@ -1264,6 +1305,16 @@ class UniverseExplorer {
                     },
                     timeWhenGravityDisabled: this.time
                 };
+                
+                // Debug: Log velocity calculations
+                if (this.debugMode) {
+                    console.log(`${name} velocity:`, {
+                        vx: velocityX.toFixed(3),
+                        vz: velocityZ.toFixed(3),
+                        magnitude: Math.sqrt(velocityX*velocityX + velocityZ*velocityZ).toFixed(3),
+                        position: {x: body.object.position.x.toFixed(2), z: body.object.position.z.toFixed(2)}
+                    });
+                }
             }
         });
     }
@@ -2327,27 +2378,24 @@ class UniverseExplorer {
                         body.orbit.position.copy(parent.object.position);
                     }
                 }
-            } else if (body.semiMajorAxis && body.eccentricity !== undefined) {
-                // Check if this is Newtonian model with gravity disabled
-                if (this.currentModel === 'newtonian' && !this.newtonianModel.gravityEnabled) {
-                    // Straight-line motion (no gravity)
-                    const velocity = this.newtonianModel.planetVelocities[name];
-                    if (velocity) {
-                        const deltaTime = this.time - velocity.timeWhenGravityDisabled;
-                        const x = velocity.initialPosition.x + velocity.x * deltaTime * this.animationSpeed;
-                        const z = velocity.initialPosition.z + velocity.z * deltaTime * this.animationSpeed;
-                        body.object.position.set(x, 0, z);
-                    }
-                } else {
-                    // Kepler elliptical orbit (gravity enabled)
-                    body.angle += body.speed * 0.01 * this.animationSpeed;
-                    const r = body.semiMajorAxis * (1 - body.eccentricity * body.eccentricity) / 
-                             (1 + body.eccentricity * Math.cos(body.angle));
-                    const c = body.focusOffset || 0;
-                    const x = r * Math.cos(body.angle) - c;
-                    const z = r * Math.sin(body.angle);
+            } else if (this.currentModel === 'newtonian' && !this.newtonianModel.gravityEnabled) {
+                // Straight-line motion for ANY body when gravity is disabled
+                const velocity = this.newtonianModel.planetVelocities[name];
+                if (velocity) {
+                    const deltaTime = this.time - velocity.timeWhenGravityDisabled;
+                    const x = velocity.initialPosition.x + velocity.x * deltaTime;
+                    const z = velocity.initialPosition.z + velocity.z * deltaTime;
                     body.object.position.set(x, 0, z);
                 }
+            } else if (body.semiMajorAxis && body.eccentricity !== undefined) {
+                // Kepler elliptical orbit (gravity enabled)
+                body.angle += body.speed * 0.01 * this.animationSpeed;
+                const r = body.semiMajorAxis * (1 - body.eccentricity * body.eccentricity) / 
+                         (1 + body.eccentricity * Math.cos(body.angle));
+                const c = body.focusOffset || 0;
+                const x = r * Math.cos(body.angle) - c;
+                const z = r * Math.sin(body.angle);
+                body.object.position.set(x, 0, z);
             } else if (body.distance !== undefined) {
                 // Circular orbit
                 let angle = this.time * body.speed;
