@@ -103,14 +103,16 @@ class UniverseExplorer {
 • Gravitational force strength depends on both mass and distance
 • Proper orbital speeds based on mass and orbital radius
 
-<strong>💥 Interactive Collision System:</strong>
-• Toggle gravity off (🚀 No Gravity) to see planets fly in straight lines
-• Realistic collision detection between all objects
-• Two collision outcomes:
-  - Planet Merging: Similar masses → bright flash + larger combined planet
-  - Explosive Fragmentation: Different masses → particle explosion + debris field
-• Conservation of momentum and mass in all collisions
-• Explosion particles with realistic physics (gravity effects, fade over time)
+                <strong>💥 Interactive Collision System:</strong>
+                • Collisions only occur when gravity is disabled (🚀 No Gravity)
+                • With gravity on, stable orbits prevent collisions (realistic behavior)
+                • Toggle gravity off to see planets fly in straight lines and collide
+                • Realistic collision detection between all objects (excludes parent-child relationships)
+                • Two collision outcomes:
+                  - Planet Merging: Similar masses → bright flash + larger combined planet
+                  - Explosive Fragmentation: Different masses → particle explosion + debris field
+                • Conservation of momentum and mass in all collisions
+                • Explosion particles with realistic physics (gravity effects, fade over time)
 
 <strong>🎮 Interactive Features:</strong>
 • Gravity Toggle: Enable/disable gravitational forces
@@ -2409,10 +2411,17 @@ This model demonstrates the fundamental principles that govern our solar system 
                 // Skip asteroids colliding with each other (too many)
                 if (name1.startsWith('asteroid') && name2.startsWith('asteroid')) continue;
                 
+                // Skip parent-child relationships (e.g., Earth-Moon, Jupiter-Io)
+                if (this.isParentChildRelationship(name1, body1, name2, body2)) continue;
+                
+                // Only detect collisions when gravity is disabled (more realistic)
+                // With gravity on, stable orbits shouldn't result in collisions
+                if (this.newtonianModel.gravityEnabled) continue;
+                
                 const distance = body1.object.position.distanceTo(body2.object.position);
                 const body1Size = this.getCelestialBodySize(body1.object);
                 const body2Size = this.getCelestialBodySize(body2.object);
-                const collisionDistance = body1Size + body2Size + 1; // Small buffer
+                const collisionDistance = body1Size + body2Size + 0.5; // Smaller buffer for more realistic collisions
                 
                 if (distance < collisionDistance) {
                     this.handleCollision(name1, body1, name2, body2);
@@ -2420,6 +2429,33 @@ This model demonstrates the fundamental principles that govern our solar system 
                 }
             }
         }
+    }
+
+    /**
+     * Check if two bodies have a parent-child relationship
+     */
+    isParentChildRelationship(name1, body1, name2, body2) {
+        // Check if one body is the parent of the other
+        if (body1.parent === name2 || body2.parent === name1) {
+            return true;
+        }
+        
+        // Check for specific known relationships
+        const relationships = [
+            ['earth', 'moon'],
+            ['jupiter', 'io'],
+            ['jupiter', 'europa'],
+            ['jupiter', 'ganymede'],
+            ['jupiter', 'callisto']
+        ];
+        
+        for (const [parent, child] of relationships) {
+            if ((name1 === parent && name2 === child) || (name1 === child && name2 === parent)) {
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**

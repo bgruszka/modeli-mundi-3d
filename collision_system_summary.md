@@ -8,6 +8,8 @@ Successfully added realistic collision detection and response system to the Newt
 ### 1. Collision Detection
 - **Real-time collision detection** between all celestial bodies except the Sun
 - **Smart filtering** to prevent excessive asteroid-to-asteroid collisions
+- **Parent-child relationship exclusion** (Earth-Moon, Jupiter-Io, etc.)
+- **Gravity-based activation** - collisions only occur when gravity is disabled
 - **Precise distance calculations** using object sizes and collision buffers
 - **One collision per frame** to prevent cascade effects
 
@@ -48,9 +50,10 @@ Successfully added realistic collision detection and response system to the Newt
 ### 4. Integration with Gravity Toggle
 
 #### With Gravity Enabled (🌍)
-- **Standard behavior**: Objects follow normal orbital mechanics
-- **Rare collisions**: Due to stable orbits, collisions are uncommon
-- **Realistic physics**: Merged planets and debris follow gravitational laws
+- **No collisions**: Collision detection is disabled (realistic behavior)
+- **Stable orbits**: Objects follow normal orbital mechanics without colliding
+- **Educational value**: Demonstrates how gravity maintains stable solar systems
+- **Parent-child relationships**: Moon orbits Earth, Jupiter's moons orbit Jupiter
 
 #### With Gravity Disabled (🚀)
 - **Frequent collisions**: Straight-line motion increases collision probability
