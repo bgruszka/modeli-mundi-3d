@@ -62,6 +62,10 @@ class UniverseExplorer {
             kepler: {
                 title: "Kepler's Elliptical Orbits",
                 description: "Refined heliocentric model with elliptical rather than circular orbits, based on careful observations of Mars. This model accurately predicted planetary positions."
+            },
+            newtonian: {
+                title: "Newtonian Gravitational Model",
+                description: "Advanced heliocentric model incorporating Newton's law of universal gravitation. Features elliptical orbits with visible gravitational force interactions between celestial bodies, demonstrating how mass and distance affect orbital mechanics."
             }
         };
 
@@ -1346,6 +1350,9 @@ class UniverseExplorer {
             case 'kepler':
                 this.createKeplerModel();
                 break;
+            case 'newtonian':
+                this.createNewtonianModel();
+                break;
         }
 
         // Apply current visual element toggle states to the new model
@@ -1767,6 +1774,289 @@ class UniverseExplorer {
     }
 
     /**
+     * Create Newton's gravitational model with force visualizations
+     */
+    createNewtonianModel() {
+        // Sun at center with enhanced gravitational field visualization
+        const sun = this.createCelestialBody('Sun', 3, 0xffd700, 0, 0, 0);
+        this.celestialBodies.sun = { 
+            object: sun,
+            mass: 1000, // Relative mass for gravitational calculations
+            gravitationalInfluence: true
+        };
+
+        // Add gravitational field visualization around the sun
+        const fieldGeometry = new THREE.SphereGeometry(5, 32, 32);
+        const fieldMaterial = new THREE.MeshBasicMaterial({
+            color: 0xffd700,
+            transparent: true,
+            opacity: 0.05,
+            side: THREE.BackSide
+        });
+        const gravitationalField = new THREE.Mesh(fieldGeometry, fieldMaterial);
+        this.scene.add(gravitationalField);
+        this.addWireframeToTracking(gravitationalField);
+
+        // Planets with realistic mass ratios and gravitational parameters
+        const planets = [
+            { name: 'Mercury', a: 8, e: 0.21, size: 1, color: 0x8c7853, speed: 2.4, mass: 0.33 },
+            { name: 'Venus', a: 12, e: 0.007, size: 1.5, color: 0xffc649, speed: 1.8, mass: 4.9 },
+            { name: 'Earth', a: 18, e: 0.017, size: 2, color: 0x4a90e2, speed: 1.2, mass: 5.97 },
+            { name: 'Mars', a: 25, e: 0.093, size: 1.3, color: 0xff6347, speed: 0.8, mass: 0.64 },
+            { name: 'Jupiter', a: 45, e: 0.048, size: 2.5, color: 0xdaa520, speed: 0.4, mass: 190 },
+            { name: 'Saturn', a: 65, e: 0.054, size: 2.2, color: 0xf4a460, speed: 0.3, mass: 57 }
+        ];
+
+        // Create gravitational force lines array
+        this.gravitationalForces = [];
+
+        planets.forEach(planet => {
+            // Calculate focus positions for ellipse
+            const c = planet.a * planet.e;
+            const focus1 = new THREE.Vector3(-c, 0, 0); // Sun is at one focus
+            const focus2 = new THREE.Vector3(c, 0, 0);   // Empty focus
+
+            // Create elliptical orbit path with enhanced visualization
+            const orbitPoints = [];
+            const segments = 120;
+            for (let i = 0; i <= segments; i++) {
+                const theta = (i / segments) * Math.PI * 2;
+                const r = planet.a * (1 - planet.e * planet.e) / (1 + planet.e * Math.cos(theta));
+                orbitPoints.push(new THREE.Vector3(r * Math.cos(theta) - c, 0, r * Math.sin(theta)));
+            }
+            
+            const orbitGeometry = new THREE.BufferGeometry().setFromPoints(orbitPoints);
+            const orbitMaterial = new THREE.LineBasicMaterial({
+                color: planet.color,
+                transparent: true,
+                opacity: 0.6
+            });
+            const orbit = new THREE.Line(orbitGeometry, orbitMaterial);
+            this.scene.add(orbit);
+            this.addOrbitToTracking(orbit);
+
+            // Add gravitational force vectors for significant masses
+            if (planet.mass > 1) {
+                // Create force line from sun to planet
+                const forceGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, 0, 0),
+                    new THREE.Vector3(planet.a - c, 0, 0)
+                ]);
+                const forceMaterial = new THREE.LineBasicMaterial({
+                    color: 0xff0000,
+                    transparent: true,
+                    opacity: 0.3
+                });
+                const forceLine = new THREE.Line(forceGeometry, forceMaterial);
+                this.scene.add(forceLine);
+                this.addWireframeToTracking(forceLine);
+                this.gravitationalForces.push({
+                    line: forceLine,
+                    planet: planet.name.toLowerCase(),
+                    strength: planet.mass / 100 // Visual strength indicator
+                });
+
+                // Add gravitational influence sphere around massive planets
+                const influenceGeometry = new THREE.SphereGeometry(planet.size * 2, 16, 16);
+                const influenceMaterial = new THREE.MeshBasicMaterial({
+                    color: planet.color,
+                    transparent: true,
+                    opacity: 0.08,
+                    side: THREE.BackSide
+                });
+                const influenceSphere = new THREE.Mesh(influenceGeometry, influenceMaterial);
+                this.scene.add(influenceSphere);
+                this.addWireframeToTracking(influenceSphere);
+                
+                // Store influence sphere with planet
+                this.gravitationalForces.push({
+                    influence: influenceSphere,
+                    planet: planet.name.toLowerCase(),
+                    type: 'influence'
+                });
+            }
+
+            // Add focus point markers with enhanced styling
+            if (planet.e > 0.05) {
+                // Empty focus point
+                const focusGeometry = new THREE.SphereGeometry(0.4, 12, 12);
+                const focusMaterial = new THREE.MeshBasicMaterial({
+                    color: planet.color,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const focusPoint = new THREE.Mesh(focusGeometry, focusMaterial);
+                focusPoint.position.copy(focus2);
+                this.scene.add(focusPoint);
+                this.addWireframeToTracking(focusPoint);
+
+                // Add cross marker
+                const crossGeometry = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-0.8, 0, 0),
+                    new THREE.Vector3(0.8, 0, 0)
+                ]);
+                const crossMaterial = new THREE.LineBasicMaterial({
+                    color: planet.color,
+                    transparent: true,
+                    opacity: 0.9
+                });
+                const cross1 = new THREE.Line(crossGeometry, crossMaterial);
+                cross1.position.copy(focus2);
+                this.scene.add(cross1);
+                this.addWireframeToTracking(cross1);
+
+                const crossGeometry2 = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(0, 0, -0.8),
+                    new THREE.Vector3(0, 0, 0.8)
+                ]);
+                const cross2 = new THREE.Line(crossGeometry2, crossMaterial);
+                cross2.position.copy(focus2);
+                this.scene.add(cross2);
+                this.addWireframeToTracking(cross2);
+            }
+
+            // Add velocity vectors at perihelion and aphelion
+            const perihelionDistance = planet.a * (1 - planet.e);
+            const aphelionDistance = planet.a * (1 + planet.e);
+            
+            // Perihelion velocity vector (faster)
+            const perihelionVel = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 0, 1).normalize(),
+                new THREE.Vector3(perihelionDistance - c, 0, 0),
+                6,
+                0x00ff00,
+                2,
+                1
+            );
+            perihelionVel.line.material.transparent = true;
+            perihelionVel.line.material.opacity = 0.7;
+            perihelionVel.cone.material.transparent = true;
+            perihelionVel.cone.material.opacity = 0.7;
+            this.scene.add(perihelionVel);
+            this.addWireframeToTracking(perihelionVel);
+
+            // Aphelion velocity vector (slower)
+            const aphelionVel = new THREE.ArrowHelper(
+                new THREE.Vector3(0, 0, 1).normalize(),
+                new THREE.Vector3(-aphelionDistance - c, 0, 0),
+                3,
+                0x0066ff,
+                1.5,
+                0.8
+            );
+            aphelionVel.line.material.transparent = true;
+            aphelionVel.line.material.opacity = 0.7;
+            aphelionVel.cone.material.transparent = true;
+            aphelionVel.cone.material.opacity = 0.7;
+            this.scene.add(aphelionVel);
+            this.addWireframeToTracking(aphelionVel);
+
+            // Planet with enhanced properties
+            const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.a - c, 0, 0);
+            this.celestialBodies[planet.name.toLowerCase()] = {
+                object: body,
+                orbit: orbit,
+                semiMajorAxis: planet.a,
+                eccentricity: planet.e,
+                speed: planet.speed,
+                mass: planet.mass,
+                angle: Math.random() * Math.PI * 2,
+                focusOffset: c,
+                gravitationalForces: true // Flag for gravitational calculations
+            };
+        });
+
+        // Add asteroid belt to show gravitational perturbations
+        this.createAsteroidBelt();
+
+        // Add Earth's Moon with tidal effects
+        const moon = this.createCelestialBody('Moon', 0.5, 0xc0c0c0, 18 + 3, 0, 0);
+        this.celestialBodies.moon = {
+            object: moon,
+            distance: 3,
+            speed: 4,
+            parent: 'earth',
+            mass: 0.73,
+            tidalForce: true
+        };
+
+        // Add gravitational interaction lines between major planets
+        this.addInterplanetaryForces();
+    }
+
+    /**
+     * Create asteroid belt to demonstrate gravitational perturbations
+     */
+    createAsteroidBelt() {
+        const asteroidCount = 30;
+        const asteroidBeltRadius = 35; // Between Mars and Jupiter
+        
+        for (let i = 0; i < asteroidCount; i++) {
+            const angle = (i / asteroidCount) * Math.PI * 2;
+            const radiusVariation = (Math.random() - 0.5) * 8;
+            const radius = asteroidBeltRadius + radiusVariation;
+            
+            const asteroidGeometry = new THREE.SphereGeometry(0.1 + Math.random() * 0.2, 8, 8);
+            const asteroidMaterial = new THREE.MeshPhongMaterial({
+                color: 0x8B4513,
+                transparent: true,
+                opacity: 0.8
+            });
+            const asteroid = new THREE.Mesh(asteroidGeometry, asteroidMaterial);
+            
+            const x = Math.cos(angle) * radius;
+            const z = Math.sin(angle) * radius;
+            asteroid.position.set(x, 0, z);
+            
+            this.scene.add(asteroid);
+            this.addWireframeToTracking(asteroid);
+            
+            // Store asteroid for animation
+            this.celestialBodies[`asteroid${i}`] = {
+                object: asteroid,
+                distance: radius,
+                speed: 0.5 + Math.random() * 0.3,
+                angle: angle,
+                type: 'asteroid',
+                perturbation: Math.random() * 0.1 // Random perturbation factor
+            };
+        }
+    }
+
+    /**
+     * Add gravitational interaction lines between major planets
+     */
+    addInterplanetaryForces() {
+        const majorPlanets = ['jupiter', 'saturn', 'earth', 'mars'];
+        
+        majorPlanets.forEach((planet1, i) => {
+            majorPlanets.forEach((planet2, j) => {
+                if (i < j) { // Avoid duplicate lines
+                    const forceGeometry = new THREE.BufferGeometry().setFromPoints([
+                        new THREE.Vector3(0, 0, 0),
+                        new THREE.Vector3(10, 0, 0)
+                    ]);
+                    const forceMaterial = new THREE.LineBasicMaterial({
+                        color: 0x888888,
+                        transparent: true,
+                        opacity: 0.15
+                    });
+                    const forceLine = new THREE.Line(forceGeometry, forceMaterial);
+                    this.scene.add(forceLine);
+                    this.addWireframeToTracking(forceLine);
+                    
+                    this.gravitationalForces.push({
+                        line: forceLine,
+                        planet1: planet1,
+                        planet2: planet2,
+                        type: 'interplanetary'
+                    });
+                }
+            });
+        });
+    }
+
+    /**
      * Create a celestial body (planet, moon, sun)
      */
     createCelestialBody(name, size, color, x, y, z) {
@@ -1912,7 +2202,7 @@ class UniverseExplorer {
 
         Object.entries(this.celestialBodies).forEach(([name, body]) => {
             if (name === 'earth' && this.currentModel === 'aristotle') return; // Earth stays fixed in Aristotle model
-            if (name === 'sun' && (this.currentModel === 'copernican' || this.currentModel === 'galilean' || this.currentModel === 'kepler')) return; // Sun stays fixed in heliocentric models
+            if (name === 'sun' && (this.currentModel === 'copernican' || this.currentModel === 'galilean' || this.currentModel === 'kepler' || this.currentModel === 'newtonian')) return; // Sun stays fixed in heliocentric models
 
             // Add planetary rotation for realism
             if (body.object && body.object.userData.rotationSpeed) {
@@ -1969,6 +2259,67 @@ class UniverseExplorer {
                 body.object.position.set(x, 0, z);
             }
         });
+
+        // Update gravitational force visualizations for Newtonian model
+        if (this.currentModel === 'newtonian' && this.gravitationalForces) {
+            this.gravitationalForces.forEach(force => {
+                if (force.type === 'interplanetary') {
+                    // Update interplanetary force lines
+                    const planet1 = this.celestialBodies[force.planet1];
+                    const planet2 = this.celestialBodies[force.planet2];
+                    
+                    if (planet1 && planet2 && planet1.object && planet2.object) {
+                        const positions = force.line.geometry.attributes.position.array;
+                        positions[0] = planet1.object.position.x;
+                        positions[1] = planet1.object.position.y;
+                        positions[2] = planet1.object.position.z;
+                        positions[3] = planet2.object.position.x;
+                        positions[4] = planet2.object.position.y;
+                        positions[5] = planet2.object.position.z;
+                        force.line.geometry.attributes.position.needsUpdate = true;
+                        
+                        // Adjust opacity based on distance (closer = stronger force)
+                        const distance = planet1.object.position.distanceTo(planet2.object.position);
+                        const opacity = Math.max(0.05, 0.3 / (distance * 0.1));
+                        force.line.material.opacity = opacity;
+                    }
+                } else if (force.line && force.planet) {
+                    // Update force lines from sun to planets
+                    const planet = this.celestialBodies[force.planet];
+                    if (planet && planet.object) {
+                        const positions = force.line.geometry.attributes.position.array;
+                        positions[3] = planet.object.position.x;
+                        positions[4] = planet.object.position.y;
+                        positions[5] = planet.object.position.z;
+                        force.line.geometry.attributes.position.needsUpdate = true;
+                    }
+                } else if (force.influence && force.planet) {
+                    // Update influence spheres to follow planets
+                    const planet = this.celestialBodies[force.planet];
+                    if (planet && planet.object) {
+                        force.influence.position.copy(planet.object.position);
+                    }
+                }
+            });
+
+            // Update asteroid belt with gravitational perturbations
+            Object.entries(this.celestialBodies).forEach(([name, body]) => {
+                if (body.type === 'asteroid') {
+                    // Simple gravitational perturbation from Jupiter
+                    const jupiter = this.celestialBodies.jupiter;
+                    if (jupiter && jupiter.object) {
+                        const distanceToJupiter = body.object.position.distanceTo(jupiter.object.position);
+                        const perturbation = (body.perturbation || 0) * Math.sin(this.time * 0.5) * (50 / distanceToJupiter);
+                        
+                        // Update asteroid position with perturbation
+                        body.angle += (body.speed * 0.01 * this.animationSpeed) + perturbation * 0.01;
+                        const x = Math.cos(body.angle) * body.distance;
+                        const z = Math.sin(body.angle) * body.distance;
+                        body.object.position.set(x, 0, z);
+                    }
+                }
+            });
+        }
     }
 
     /**
