@@ -56,9 +56,11 @@ Successfully added realistic collision detection and response system to the Newt
 - **Parent-child relationships**: Moon orbits Earth, Jupiter's moons orbit Jupiter
 
 #### With Gravity Disabled (🚀)
-- **Frequent collisions**: Straight-line motion increases collision probability
+- **All objects fly in straight lines**: Planets, moons, and asteroids break free from orbits
+- **Frequent collisions**: Straight-line motion increases collision probability dramatically
 - **Spectacular effects**: More dramatic as objects fly in all directions
 - **Debris continuation**: Explosion fragments continue in straight lines
+- **Asteroid behavior**: Asteroids also fly off tangentially, no longer orbiting
 - **Educational value**: Demonstrates what happens without gravitational binding
 
 ### 5. Visual Effects

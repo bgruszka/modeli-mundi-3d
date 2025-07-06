@@ -2516,8 +2516,8 @@ This model demonstrates the fundamental principles that govern our solar system 
             });
         }
 
-        // Update asteroid belt with gravitational perturbations (always for Newtonian model)
-        if (this.currentModel === 'newtonian') {
+        // Update asteroid belt with gravitational perturbations (only when gravity is enabled)
+        if (this.currentModel === 'newtonian' && this.newtonianModel.gravityEnabled) {
             Object.entries(this.celestialBodies).forEach(([name, body]) => {
                 if (body.type === 'asteroid') {
                     // Simple gravitational perturbation from Jupiter
