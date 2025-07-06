@@ -29,14 +29,10 @@ This document summarizes the simple geometric objects used in each historical mo
 - **Main Orbit Rings**: Circular rings showing the deferent (main circular path)
 - **Epicycle Rings**: Smaller rings showing the epicycles (small circles on which planets move)
 
-### Lines:
-- **Deferent Lines**: Lines connecting Earth's center to the center of each epicycle
-- **Epicycle Lines**: Lines connecting epicycle centers to the planets themselves
-
 ### Visual Features:
-- Dynamic connecting lines that update during animation
 - Color-coded elements matching each planet's color
 - Transparent rings with appropriate opacity for clarity
+- Clean geometric representation of epicycle motion
 
 ## 3. Copernican Heliocentric Model (1543)
 

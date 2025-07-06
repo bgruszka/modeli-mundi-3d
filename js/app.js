@@ -1304,13 +1304,7 @@ class UniverseExplorer {
             if (body.epicycle) {
                 this.scene.remove(body.epicycle);
             }
-            // Remove Ptolemaic model specific objects
-            if (body.connectingLine) {
-                this.scene.remove(body.connectingLine);
-            }
-            if (body.epicycleLine) {
-                this.scene.remove(body.epicycleLine);
-            }
+
 
         });
         
@@ -1446,7 +1440,7 @@ class UniverseExplorer {
     }
 
     /**
-     * Create Ptolemaic model with epicycles and connecting lines
+     * Create Ptolemaic model with epicycles
      */
     createPtolemaicModel() {
         // Earth at center
@@ -1490,7 +1484,7 @@ class UniverseExplorer {
                 epicycleSpeed: planet.speed * 3
             };
 
-            // Epicycle circle and connecting line for planets that have them
+            // Epicycle circle for planets that have them
             if (planet.epicycleRadius > 0) {
                 // Epicycle ring
                 const epicycleGeometry = new THREE.RingGeometry(
@@ -1509,36 +1503,6 @@ class UniverseExplorer {
                 this.scene.add(epicycle);
                 this.addOrbitToTracking(epicycle);
                 this.celestialBodies[planet.name.toLowerCase()].epicycle = epicycle;
-
-                // Connecting line from deferent center to epicycle center
-                const lineGeometry = new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(0, 0, 0),
-                    new THREE.Vector3(planet.distance, 0, 0)
-                ]);
-                const lineMaterial = new THREE.LineBasicMaterial({
-                    color: planet.color,
-                    transparent: true,
-                    opacity: 0.6
-                });
-                const connectingLine = new THREE.Line(lineGeometry, lineMaterial);
-                this.scene.add(connectingLine);
-                this.addOrbitToTracking(connectingLine);
-                this.celestialBodies[planet.name.toLowerCase()].connectingLine = connectingLine;
-
-                // Epicycle radius line (from epicycle center to planet)
-                const epicycleLineGeometry = new THREE.BufferGeometry().setFromPoints([
-                    new THREE.Vector3(0, 0, 0),
-                    new THREE.Vector3(planet.epicycleRadius, 0, 0)
-                ]);
-                const epicycleLineMaterial = new THREE.LineBasicMaterial({
-                    color: planet.color,
-                    transparent: true,
-                    opacity: 0.8
-                });
-                const epicycleLine = new THREE.Line(epicycleLineGeometry, epicycleLineMaterial);
-                this.scene.add(epicycleLine);
-                this.addOrbitToTracking(epicycleLine);
-                this.celestialBodies[planet.name.toLowerCase()].epicycleLine = epicycleLine;
             }
         });
     }
@@ -1995,21 +1959,6 @@ class UniverseExplorer {
                     // Update epicycle position
                     if (body.epicycle) {
                         body.epicycle.position.set(centerX, 0, centerZ);
-                    }
-                    
-                    // Update connecting lines for Ptolemaic model
-                    if (body.connectingLine) {
-                        // Update the deferent line (from Earth to epicycle center)
-                        const positions = body.connectingLine.geometry.attributes.position.array;
-                        positions[0] = 0; positions[1] = 0; positions[2] = 0; // Earth at origin
-                        positions[3] = centerX; positions[4] = 0; positions[5] = centerZ; // Epicycle center
-                        body.connectingLine.geometry.attributes.position.needsUpdate = true;
-                    }
-                    
-                    if (body.epicycleLine) {
-                        // Update the epicycle line (from epicycle center to planet)
-                        body.epicycleLine.position.set(centerX, 0, centerZ);
-                        body.epicycleLine.rotation.y = epicycleAngle;
                     }
                 } else {
                     // Simple circular motion
