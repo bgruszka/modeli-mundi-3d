@@ -512,15 +512,15 @@ class UniverseExplorer {
                          window.innerWidth <= 768 || 
                          ('ontouchstart' in window);
         
-        if (isMobile) {
-            // Remove all title attributes on mobile to prevent browser tooltips
-            document.querySelectorAll('[title]').forEach(element => {
-                element.removeAttribute('title');
-            });
-            
-            // Add a help button to the controls info panel
-            this.addMobileHelpButton();
-        }
+        console.log('Mobile detection:', isMobile, 'UserAgent:', navigator.userAgent, 'Width:', window.innerWidth);
+        
+        // Remove all title attributes on mobile to prevent browser tooltips
+        document.querySelectorAll('[title]').forEach(element => {
+            element.removeAttribute('title');
+        });
+        
+        // Always add mobile help button with proper positioning
+        this.addMobileHelpButton();
     }
 
     /**
@@ -529,66 +529,79 @@ class UniverseExplorer {
     addMobileHelpButton() {
         const controlsInfo = document.getElementById('controls-info');
         if (controlsInfo) {
-            // Make sure the controls info is visible and well-positioned
-            controlsInfo.style.cssText = `
-                position: fixed;
-                bottom: 15px;
-                left: 15px;
-                background: rgba(0, 0, 0, 0.85);
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                border-radius: 12px;
-                padding: 12px;
-                font-size: 0.7em;
-                color: #ccc;
-                max-width: 140px;
-                z-index: 1000;
-                line-height: 1.3;
-            `;
+            console.log('Adding mobile help button to controls-info');
+            
+                         // Force position the controls info properly with !important
+             controlsInfo.style.setProperty('position', 'fixed', 'important');
+             controlsInfo.style.setProperty('bottom', '20px', 'important');
+             controlsInfo.style.setProperty('left', '20px', 'important');
+             controlsInfo.style.setProperty('right', 'auto', 'important');
+             controlsInfo.style.setProperty('top', 'auto', 'important');
+            controlsInfo.style.background = 'rgba(0, 0, 0, 0.85)';
+            controlsInfo.style.backdropFilter = 'blur(10px)';
+            controlsInfo.style.border = '1px solid rgba(255, 255, 255, 0.15)';
+            controlsInfo.style.borderRadius = '12px';
+            controlsInfo.style.padding = '12px';
+            controlsInfo.style.fontSize = '0.7em';
+            controlsInfo.style.color = '#ccc';
+            controlsInfo.style.maxWidth = '140px';
+                         controlsInfo.style.setProperty('z-index', '1500', 'important');
+            controlsInfo.style.lineHeight = '1.3';
+            
+            // Remove any existing help button first
+            const existingHelpBtn = controlsInfo.querySelector('.help-btn');
+            if (existingHelpBtn) {
+                existingHelpBtn.remove();
+            }
             
             // Add help button
             const helpBtn = document.createElement('button');
             helpBtn.innerHTML = '❓';
             helpBtn.className = 'help-btn';
             helpBtn.title = 'Show detailed help';
-            helpBtn.style.cssText = `
-                position: absolute;
-                top: -8px;
-                right: -8px;
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                border: none;
-                color: white;
-                font-size: 16px;
-                box-shadow: 0 3px 12px rgba(0,0,0,0.4);
-                cursor: pointer;
-                z-index: 1001;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                transition: all 0.3s ease;
-            `;
+            
+                         // Force button styling - make it bigger and more visible for testing
+             helpBtn.style.position = 'absolute';
+             helpBtn.style.top = '-15px';
+             helpBtn.style.right = '-15px';
+             helpBtn.style.width = '50px';
+             helpBtn.style.height = '50px';
+            helpBtn.style.borderRadius = '50%';
+            helpBtn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+            helpBtn.style.border = 'none';
+            helpBtn.style.color = 'white';
+                         helpBtn.style.fontSize = '24px';
+            helpBtn.style.boxShadow = '0 3px 12px rgba(0,0,0,0.4)';
+            helpBtn.style.cursor = 'pointer';
+                         helpBtn.style.zIndex = '1600';
+            helpBtn.style.display = 'flex';
+            helpBtn.style.alignItems = 'center';
+            helpBtn.style.justifyContent = 'center';
+            helpBtn.style.transition = 'all 0.3s ease';
             
             // Add hover effect
-            helpBtn.addEventListener('mouseenter', () => {
+            helpBtn.addEventListener('touchstart', () => {
                 helpBtn.style.transform = 'scale(1.1)';
                 helpBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
             });
             
-            helpBtn.addEventListener('mouseleave', () => {
+            helpBtn.addEventListener('touchend', () => {
                 helpBtn.style.transform = 'scale(1)';
                 helpBtn.style.boxShadow = '0 3px 12px rgba(0,0,0,0.4)';
             });
             
             helpBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
+                console.log('Help button clicked!');
                 this.showMobileHelp();
             });
             
-            controlsInfo.style.position = 'relative';
+                         // Keep controls info as fixed, but ensure relative positioning for button
             controlsInfo.appendChild(helpBtn);
+            
+            console.log('Help button added successfully');
+        } else {
+            console.error('controls-info element not found!');
         }
     }
 
