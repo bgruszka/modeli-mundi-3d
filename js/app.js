@@ -1311,10 +1311,7 @@ class UniverseExplorer {
             if (body.epicycleLine) {
                 this.scene.remove(body.epicycleLine);
             }
-            // Remove Copernican model specific objects
-            if (body.radialLine) {
-                this.scene.remove(body.radialLine);
-            }
+
         });
         
         // Remove all tracked visual elements (orbits, wireframes, etc.)
@@ -1590,26 +1587,11 @@ class UniverseExplorer {
             this.scene.add(orbit);
             this.addOrbitToTracking(orbit);
 
-            // Add radial line from sun to planet for clarity
-            const radialLineGeometry = new THREE.BufferGeometry().setFromPoints([
-                new THREE.Vector3(0, 0, 0),
-                new THREE.Vector3(planet.distance, 0, 0)
-            ]);
-            const radialLineMaterial = new THREE.LineBasicMaterial({
-                color: planet.color,
-                transparent: true,
-                opacity: 0.2
-            });
-            const radialLine = new THREE.Line(radialLineGeometry, radialLineMaterial);
-            this.scene.add(radialLine);
-            this.addOrbitToTracking(radialLine);
-
             // Planet
             const body = this.createCelestialBody(planet.name, planet.size, planet.color, planet.distance, 0, 0);
             this.celestialBodies[planet.name.toLowerCase()] = {
                 object: body,
                 orbit: orbit,
-                radialLine: radialLine,
                 distance: planet.distance,
                 speed: planet.speed
             };
@@ -2036,11 +2018,6 @@ class UniverseExplorer {
                 }
 
                 body.object.position.set(x, 0, z);
-                
-                // Update radial line for Copernican model
-                if (body.radialLine && (this.currentModel === 'copernican' || this.currentModel === 'galilean')) {
-                    body.radialLine.rotation.y = angle;
-                }
             }
         });
     }

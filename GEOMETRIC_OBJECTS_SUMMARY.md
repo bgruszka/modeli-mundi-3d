@@ -50,13 +50,10 @@ This document summarizes the simple geometric objects used in each historical mo
 - **Planetary Orbit Rings**: Circular rings for each planet's orbit
 - **Moon Orbit Ring**: Small ring around Earth for the Moon's orbit
 
-### Lines:
-- **Radial Lines**: Lines from the Sun to each planet showing heliocentric arrangement
-
 ### Visual Features:
 - Color-coded orbit rings matching each planet
-- Rotating radial lines that follow planetary motion
 - Enhanced Sun visualization with glow effect
+- Clean heliocentric arrangement without visual clutter
 
 ## 4. Galilean Model with Moons (1610)
 
@@ -68,8 +65,7 @@ This document summarizes the simple geometric objects used in each historical mo
 - **All Copernican Rings**: Inherits all rings from the Copernican model
 - **Jovian Moon Orbit Rings**: Four small rings around Jupiter for its moons
 
-### Lines:
-- **All Copernican Lines**: Inherits radial lines from the Copernican model
+
 
 ### Visual Features:
 - Detailed representation of Jupiter's four largest moons
