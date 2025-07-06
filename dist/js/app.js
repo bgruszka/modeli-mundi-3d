@@ -529,27 +529,61 @@ class UniverseExplorer {
     addMobileHelpButton() {
         const controlsInfo = document.getElementById('controls-info');
         if (controlsInfo) {
+            // Make sure the controls info is visible and well-positioned
+            controlsInfo.style.cssText = `
+                position: fixed;
+                bottom: 15px;
+                left: 15px;
+                background: rgba(0, 0, 0, 0.85);
+                backdrop-filter: blur(10px);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 12px;
+                padding: 12px;
+                font-size: 0.7em;
+                color: #ccc;
+                max-width: 140px;
+                z-index: 1000;
+                line-height: 1.3;
+            `;
+            
             // Add help button
             const helpBtn = document.createElement('button');
             helpBtn.innerHTML = '❓';
             helpBtn.className = 'help-btn';
+            helpBtn.title = 'Show detailed help';
             helpBtn.style.cssText = `
                 position: absolute;
-                top: -10px;
-                right: -10px;
-                width: 30px;
-                height: 30px;
+                top: -8px;
+                right: -8px;
+                width: 32px;
+                height: 32px;
                 border-radius: 50%;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 border: none;
                 color: white;
-                font-size: 14px;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+                font-size: 16px;
+                box-shadow: 0 3px 12px rgba(0,0,0,0.4);
                 cursor: pointer;
                 z-index: 1001;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
             `;
             
-            helpBtn.addEventListener('click', () => {
+            // Add hover effect
+            helpBtn.addEventListener('mouseenter', () => {
+                helpBtn.style.transform = 'scale(1.1)';
+                helpBtn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.5)';
+            });
+            
+            helpBtn.addEventListener('mouseleave', () => {
+                helpBtn.style.transform = 'scale(1)';
+                helpBtn.style.boxShadow = '0 3px 12px rgba(0,0,0,0.4)';
+            });
+            
+            helpBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
                 this.showMobileHelp();
             });
             
@@ -568,22 +602,23 @@ class UniverseExplorer {
         if (!helpOverlay) {
             helpOverlay = document.createElement('div');
             helpOverlay.id = 'mobile-help-overlay';
-            helpOverlay.style.cssText = `
-                position: fixed;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
-                backdrop-filter: blur(20px);
-                border-top: 1px solid rgba(255, 255, 255, 0.2);
-                border-radius: 20px 20px 0 0;
-                padding: 20px;
-                z-index: 2000;
-                transform: translateY(100%);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                max-height: 60vh;
-                overflow-y: auto;
-            `;
+                                                  helpOverlay.style.cssText = `
+                 position: fixed;
+                 bottom: 0;
+                 left: 0;
+                 right: 0;
+                 background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
+                 backdrop-filter: blur(20px);
+                 border-top: 1px solid rgba(255, 255, 255, 0.2);
+                 border-radius: 20px 20px 0 0;
+                 padding: 20px;
+                 z-index: 2500;
+                 transform: translateY(100%);
+                 transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                 max-height: 70vh;
+                 overflow-y: auto;
+                 box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+             `;
             
             helpOverlay.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">

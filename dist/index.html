@@ -349,6 +349,19 @@
             color: #ffd700;
         }
 
+        #controls-info {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 5px;
+            font-size: 0.8em;
+            color: #ccc;
+            max-width: 200px;
+            z-index: 1000;
+        }
+
         @media (max-width: 768px) {
             #ui-panel {
                 min-width: 260px;
@@ -385,16 +398,7 @@
                 font-size: 0.7em;
             }
 
-            /* Move controls info to bottom left to avoid center overlap */
-            #controls-info {
-                bottom: 10px;
-                left: 10px;
-                right: auto;
-                padding: 8px;
-                font-size: 0.65em;
-                max-width: 120px;
-                line-height: 1.2;
-            }
+            /* Mobile controls info styling handled by JavaScript */
 
             .model-btn {
                 padding: 6px 10px;
@@ -439,11 +443,7 @@
                 padding: 8px;
             }
 
-            #controls-info {
-                max-width: 100px;
-                font-size: 0.6em;
-                padding: 6px;
-            }
+
 
             .model-btn {
                 padding: 5px 8px;
