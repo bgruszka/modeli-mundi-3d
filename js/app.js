@@ -1290,7 +1290,7 @@ class UniverseExplorer {
      * Clear current model from scene
      */
     clearScene() {
-        // Remove all celestial bodies
+        // Remove all celestial bodies and their associated objects
         Object.values(this.celestialBodies).forEach(body => {
             if (body.object) {
                 this.scene.remove(body.object);
@@ -1304,6 +1304,25 @@ class UniverseExplorer {
             if (body.epicycle) {
                 this.scene.remove(body.epicycle);
             }
+            // Remove Ptolemaic model specific objects
+            if (body.connectingLine) {
+                this.scene.remove(body.connectingLine);
+            }
+            if (body.epicycleLine) {
+                this.scene.remove(body.epicycleLine);
+            }
+            // Remove Copernican model specific objects
+            if (body.radialLine) {
+                this.scene.remove(body.radialLine);
+            }
+        });
+        
+        // Remove all tracked visual elements (orbits, wireframes, etc.)
+        this.visualElements.orbitObjects.forEach(obj => {
+            this.scene.remove(obj);
+        });
+        this.visualElements.wireframeObjects.forEach(obj => {
+            this.scene.remove(obj);
         });
         
         // Clear visual element tracking arrays
@@ -1746,8 +1765,8 @@ class UniverseExplorer {
                 this.addWireframeToTracking(cross2);
             }
 
-            // Add major and minor axis lines for more eccentric orbits
-            if (planet.e > 0.05) {
+            // Add major and minor axis lines for more eccentric orbits (only for Mercury and Mars)
+            if (planet.e > 0.08) {
                 // Major axis
                 const majorAxisGeometry = new THREE.BufferGeometry().setFromPoints([
                     new THREE.Vector3(-planet.a - c, 0, 0),
@@ -1756,7 +1775,7 @@ class UniverseExplorer {
                 const majorAxisMaterial = new THREE.LineBasicMaterial({
                     color: planet.color,
                     transparent: true,
-                    opacity: 0.3
+                    opacity: 0.2
                 });
                 const majorAxis = new THREE.Line(majorAxisGeometry, majorAxisMaterial);
                 this.scene.add(majorAxis);
@@ -1771,7 +1790,7 @@ class UniverseExplorer {
                 const minorAxisMaterial = new THREE.LineBasicMaterial({
                     color: planet.color,
                     transparent: true,
-                    opacity: 0.3
+                    opacity: 0.2
                 });
                 const minorAxis = new THREE.Line(minorAxisGeometry, minorAxisMaterial);
                 this.scene.add(minorAxis);
