@@ -2216,8 +2216,17 @@ class UniverseExplorer {
                 body.object.rotation.y += body.object.userData.rotationSpeed;
             }
 
-            if (body.parent) {
-                // Moon or satellite orbiting around parent
+            if (this.currentModel === 'newtonian' && !this.newtonianModel.gravityEnabled) {
+                // Straight-line motion for ANY body when gravity is disabled (check FIRST!)
+                const velocity = this.newtonianModel.planetVelocities[name];
+                if (velocity) {
+                    const deltaTime = this.time - velocity.timeWhenGravityDisabled;
+                    const x = velocity.initialPosition.x + velocity.x * deltaTime;
+                    const z = velocity.initialPosition.z + velocity.z * deltaTime;
+                    body.object.position.set(x, 0, z);
+                }
+            } else if (body.parent) {
+                // Moon or satellite orbiting around parent (when gravity is ON)
                 const parent = this.celestialBodies[body.parent];
                 if (parent && parent.object) {
                     const angle = this.time * body.speed;
@@ -2228,15 +2237,6 @@ class UniverseExplorer {
                     if (body.orbit) {
                         body.orbit.position.copy(parent.object.position);
                     }
-                }
-            } else if (this.currentModel === 'newtonian' && !this.newtonianModel.gravityEnabled) {
-                // Straight-line motion for ANY body when gravity is disabled
-                const velocity = this.newtonianModel.planetVelocities[name];
-                if (velocity) {
-                    const deltaTime = this.time - velocity.timeWhenGravityDisabled;
-                    const x = velocity.initialPosition.x + velocity.x * deltaTime;
-                    const z = velocity.initialPosition.z + velocity.z * deltaTime;
-                    body.object.position.set(x, 0, z);
                 }
             } else if (body.semiMajorAxis && body.eccentricity !== undefined) {
                 // Kepler elliptical orbit (gravity enabled)
