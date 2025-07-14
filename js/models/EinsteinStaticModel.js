@@ -1,17 +1,45 @@
 /**
- * Einstein's Static Universe Model
- * Finite, static space with uniform matter distribution and cosmological constant
- * Based on Einstein's original 1917 cosmological model
+ * Einstein's Static Universe Model (1917)
+ * 
+ * Historical Context:
+ * Einstein's first application of general relativity to cosmology, proposed to solve
+ * the cosmological problem of creating a stable, finite universe. This model was
+ * revolutionary as it introduced the cosmological constant (Λ) to balance
+ * gravitational collapse, creating a mathematically elegant solution for a
+ * static, closed universe.
+ * 
+ * Key Scientific Concepts:
+ * - Finite but unbounded space (closed spherical geometry)
+ * - Static spacetime (no expansion or contraction)
+ * - Uniform matter distribution (homogeneous and isotropic)
+ * - Cosmological constant as repulsive force
+ * - Perfect balance between gravity and Λ
+ * 
+ * Mathematical Foundation:
+ * Einstein Field Equations with cosmological constant:
+ * Rμν - ½gμνR + Λgμν = 8πTμν
+ * 
+ * Historical Significance:
+ * Though later abandoned after Hubble's discovery of cosmic expansion,
+ * this model laid the groundwork for modern cosmology and demonstrated
+ * the power of general relativity in describing the universe's structure.
  */
 import { BaseModel } from './BaseModel.js';
 
 export class EinsteinStaticModel extends BaseModel {
     constructor(name, scene, textureManager) {
         super(name, scene, textureManager);
-        this.universeRadius = 100;
-        this.galaxyCount = 150;
-        this.cosmologicalConstant = 0.001;
-        this.matterDensity = 0.1;
+        
+        // Physical parameters of Einstein's static universe
+        this.universeRadius = 100;          // Finite radius of the closed universe
+        this.galaxyCount = 150;             // Uniform matter distribution
+        this.cosmologicalConstant = 0.001;  // Einstein's Λ for cosmic balance
+        this.matterDensity = 0.1;           // Critical density for static equilibrium
+        
+        // Educational parameters for visualization
+        this.showEducationalLabels = true;
+        this.showCosmologicalField = true;
+        this.showSpacetimeGrid = true;
     }
 
     async createCelestialBodies() {
@@ -230,17 +258,67 @@ export class EinsteinStaticModel extends BaseModel {
     }
 
     setupAdditionalElements() {
-        // Add text indicators for the model's key features
-        this.addModelInformation();
+        // Add educational elements to enhance learning
+        if (this.showEducationalLabels) {
+            this.addModelInformation();
+        }
+        
+        // Add historical context marker
+        this.addHistoricalMarker();
+    }
+    
+    /**
+     * Provides detailed educational information about the model
+     * @returns {Object} Educational content about Einstein's static universe
+     */
+    getEducationalInfo() {
+        return {
+            historicalContext: {
+                year: 1917,
+                motivation: "Einstein sought to apply general relativity to cosmology, needing a stable, finite universe model",
+                problem: "Without the cosmological constant, the universe would collapse under its own gravity",
+                solution: "Introduced Λ (Lambda) to create a repulsive force balancing gravity"
+            },
+            keyFeatures: {
+                geometry: "Closed spherical geometry - finite but unbounded space",
+                dynamics: "Static - no expansion or contraction over time",
+                matter: "Uniform distribution of matter throughout the universe",
+                balance: "Perfect equilibrium between gravitational attraction and cosmic repulsion"
+            },
+            mathematicalFoundation: {
+                equation: "Rμν - ½gμνR + Λgμν = 8πTμν",
+                components: {
+                    "Rμν": "Ricci curvature tensor",
+                    "R": "Ricci scalar",
+                    "gμν": "Metric tensor",
+                    "Λ": "Cosmological constant",
+                    "Tμν": "Stress-energy tensor"
+                }
+            },
+            visualization: {
+                boundary: "Wireframe sphere represents the finite edge of space",
+                galaxies: "150 galaxies show uniform matter distribution",
+                field: "Blue particles represent the cosmological constant field",
+                grid: "Static spacetime grid emphasizes no expansion",
+                observer: "Central point shows our reference frame"
+            },
+            legacy: {
+                abandonment: "Later abandoned after Hubble's discovery of cosmic expansion (1929)",
+                importance: "Laid foundation for modern cosmology and Big Bang theory",
+                revival: "Cosmological constant concept returned with dark energy discovery"
+            }
+        };
     }
 
     addModelInformation() {
-        // Create information labels
+        // Create information labels with detailed descriptions
         const infoLabels = [
-            { text: 'Finite Universe', position: new THREE.Vector3(0, this.universeRadius * 0.7, 0) },
-            { text: 'Static (No Expansion)', position: new THREE.Vector3(this.universeRadius * 0.5, 0, 0) },
-            { text: 'Uniform Matter Distribution', position: new THREE.Vector3(0, 0, this.universeRadius * 0.5) },
-            { text: 'Cosmological Constant Λ', position: new THREE.Vector3(-this.universeRadius * 0.5, 0, 0) }
+            { text: 'Finite Universe\n(Closed Spherical Geometry)', position: new THREE.Vector3(0, this.universeRadius * 0.7, 0) },
+            { text: 'Static Spacetime\n(No Expansion/Contraction)', position: new THREE.Vector3(this.universeRadius * 0.5, 0, 0) },
+            { text: 'Uniform Matter Distribution\n(Homogeneous & Isotropic)', position: new THREE.Vector3(0, 0, this.universeRadius * 0.5) },
+            { text: 'Cosmological Constant Λ\n(Repulsive Force)', position: new THREE.Vector3(-this.universeRadius * 0.5, 0, 0) },
+            { text: 'Perfect Cosmic Balance\n(Gravity vs Λ)', position: new THREE.Vector3(0, -this.universeRadius * 0.7, 0) },
+            { text: 'Einstein Field Equations\n(Rμν - ½gμνR + Λgμν = 8πTμν)', position: new THREE.Vector3(-this.universeRadius * 0.5, 0, this.universeRadius * 0.5) }
         ];
         
         infoLabels.forEach(label => {
@@ -249,25 +327,122 @@ export class EinsteinStaticModel extends BaseModel {
             this.addTemporaryObject(sprite);
         });
     }
-
-    createInfoSprite(text) {
+    
+    addHistoricalMarker() {
+        // Create a historical context marker
+        const historicalText = "Einstein's 1917 Solution\nto the Cosmological Problem\n\n'The most beautiful fate of a physical theory\nis to point the way to the establishment\nof a more comprehensive theory'";
+        
+        const marker = this.createHistoricalSprite(historicalText);
+        marker.position.set(0, this.universeRadius * 0.9, 0);
+        this.addTemporaryObject(marker);
+    }
+    
+    createHistoricalSprite(text) {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
-        canvas.width = 256;
-        canvas.height = 64;
+        canvas.width = 500;
+        canvas.height = 150;
         
-        context.fillStyle = 'rgba(0, 0, 0, 0.8)';
+        // Golden background to indicate historical significance
+        const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, 'rgba(139, 69, 19, 0.9)');
+        gradient.addColorStop(1, 'rgba(184, 134, 11, 0.9)');
+        context.fillStyle = gradient;
         context.fillRect(0, 0, canvas.width, canvas.height);
         
+        // Add decorative border
+        context.strokeStyle = 'rgba(255, 215, 0, 0.8)';
+        context.lineWidth = 3;
+        context.strokeRect(3, 3, canvas.width - 6, canvas.height - 6);
+        
+        // Handle multi-line text
+        const lines = text.split('\n');
         context.fillStyle = 'white';
-        context.font = '18px Arial';
         context.textAlign = 'center';
-        context.fillText(text, canvas.width / 2, canvas.height / 2 + 7);
+        
+        // Calculate vertical positioning for multiple lines
+        const lineHeight = 18;
+        const totalHeight = lines.length * lineHeight;
+        const startY = (canvas.height - totalHeight) / 2 + lineHeight;
+        
+        lines.forEach((line, index) => {
+            const y = startY + (index * lineHeight);
+            
+            // Use different font sizes for different parts
+            if (index < 2) {
+                context.font = 'bold 16px Arial';
+            } else if (index === 2) {
+                context.font = '12px Arial';
+            } else {
+                context.font = 'italic 12px Arial';
+            }
+            
+            // Main text with golden glow
+            context.fillStyle = 'white';
+            context.fillText(line, canvas.width / 2, y);
+            
+            // Add golden glow effect
+            context.shadowColor = 'rgba(255, 215, 0, 0.6)';
+            context.shadowBlur = 4;
+            context.fillText(line, canvas.width / 2, y);
+            context.shadowBlur = 0;
+        });
         
         const texture = new THREE.CanvasTexture(canvas);
         const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
         const sprite = new THREE.Sprite(material);
-        sprite.scale.set(15, 4, 1);
+        sprite.scale.set(25, 7.5, 1);
+        
+        return sprite;
+    }
+
+    createInfoSprite(text) {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 100;
+        
+        // Enhanced background with gradient
+        const gradient = context.createLinearGradient(0, 0, 0, canvas.height);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.9)');
+        gradient.addColorStop(1, 'rgba(0, 0, 50, 0.9)');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Add border
+        context.strokeStyle = 'rgba(100, 100, 255, 0.8)';
+        context.lineWidth = 2;
+        context.strokeRect(2, 2, canvas.width - 4, canvas.height - 4);
+        
+        // Handle multi-line text
+        const lines = text.split('\n');
+        context.fillStyle = 'white';
+        context.font = 'bold 16px Arial';
+        context.textAlign = 'center';
+        
+        // Calculate vertical positioning for multiple lines
+        const lineHeight = 20;
+        const totalHeight = lines.length * lineHeight;
+        const startY = (canvas.height - totalHeight) / 2 + lineHeight;
+        
+        lines.forEach((line, index) => {
+            const y = startY + (index * lineHeight);
+            
+            // Main text
+            context.fillStyle = 'white';
+            context.fillText(line, canvas.width / 2, y);
+            
+            // Add subtle glow effect
+            context.shadowColor = 'rgba(255, 255, 255, 0.5)';
+            context.shadowBlur = 3;
+            context.fillText(line, canvas.width / 2, y);
+            context.shadowBlur = 0;
+        });
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ map: texture, transparent: true });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(20, 5, 1);
         
         return sprite;
     }

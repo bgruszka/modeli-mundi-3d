@@ -41,11 +41,18 @@ Successfully implemented Einstein's Static Universe Model (1917) as a new cosmol
 - Demonstrates the model's isotropy and homogeneity
 
 #### 6. Information Labels
-- Four informational sprites positioned around the universe:
-  - "Finite Universe"
-  - "Static (No Expansion)"
-  - "Uniform Matter Distribution"
-  - "Cosmological Constant Λ"
+- Six comprehensive educational sprites positioned around the universe:
+  - "Finite Universe (Closed Spherical Geometry)"
+  - "Static Spacetime (No Expansion/Contraction)"
+  - "Uniform Matter Distribution (Homogeneous & Isotropic)"
+  - "Cosmological Constant Λ (Repulsive Force)"
+  - "Perfect Cosmic Balance (Gravity vs Λ)"
+  - "Einstein Field Equations (Rμν - ½gμνR + Λgμν = 8πTμν)"
+
+#### 7. Historical Context Marker
+- Golden-bordered sprite with Einstein's quote and historical context
+- Positioned at the top of the universe boundary
+- Provides educational context about the model's significance
 
 ## Technical Implementation
 
@@ -83,6 +90,13 @@ export class EinsteinStaticModel extends BaseModel {
 - **Spacetime Grid**: Completely static (no animation)
 - **Observer**: Simple rotation for visual appeal
 
+#### Educational Features
+- **Multi-line Information Labels**: Enhanced sprites with detailed explanations and scientific terminology
+- **Historical Context Marker**: Golden-bordered sprite with Einstein's quote and historical significance
+- **Comprehensive Model Description**: Detailed UI panel text explaining the model's context and importance
+- **Educational Information API**: `getEducationalInfo()` method providing structured educational content
+- **Visual Enhancements**: Gradient backgrounds, borders, and glow effects for better readability
+
 ## Historical Context
 
 Einstein's Static Universe Model was proposed in 1917 as part of his first application of general relativity to cosmology. Key historical points:
@@ -98,7 +112,8 @@ Einstein's Static Universe Model was proposed in 1917 as part of his first appli
 
 ### Model Selection
 - Available as "Einstein's Static Model (1917)" in the model selector
-- Tooltip describes it as "Einstein's finite, static universe model with uniform matter distribution and cosmological constant"
+- **Enhanced Tooltip**: Comprehensive description including "Einstein's revolutionary 1917 cosmological model: finite, static universe with uniform matter distribution and cosmological constant Λ. First application of general relativity to cosmology, featuring closed spherical geometry and perfect cosmic balance. Though later superseded by expanding universe models, this laid the foundation for modern cosmology."
+- **Detailed Info Panel**: Extensive description covering historical context, scientific concepts, mathematical foundation, and legacy
 
 ### Visual Features
 - Smooth transitions when switching to/from the model
@@ -107,10 +122,12 @@ Einstein's Static Universe Model was proposed in 1917 as part of his first appli
 - Clear visual distinction from expanding universe models
 
 ### Educational Value
-- Demonstrates the concept of a finite universe
-- Shows uniform matter distribution
-- Illustrates the cosmological constant visually
-- Provides historical context for modern cosmology
+- **Comprehensive Historical Context**: Detailed explanations of why Einstein created this model and its significance in the development of cosmology
+- **Mathematical Foundation**: Visual representation of Einstein's field equations with cosmological constant
+- **Scientific Concepts**: Clear demonstration of finite but unbounded space, static spacetime, and uniform matter distribution
+- **Visual Learning**: Multi-line educational labels with technical explanations and historical quotes
+- **Comparative Understanding**: Helps users understand the difference between static and expanding universe models
+- **Legacy Education**: Explains how this model laid the foundation for modern cosmology despite being later abandoned
 
 ## Testing Results
 
