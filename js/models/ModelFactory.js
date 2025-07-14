@@ -9,6 +9,7 @@ import { CopernicanModel } from './CopernicanModel.js';
 import { GalileanModel } from './GalileanModel.js';
 import { KeplerModel } from './KeplerModel.js';
 import { NewtonianModel } from './NewtonianModel.js';
+import { EinsteinStaticModel } from './EinsteinStaticModel.js';
 
 export class ModelFactory {
     constructor() {
@@ -19,7 +20,8 @@ export class ModelFactory {
             copernican: CopernicanModel,
             galilean: GalileanModel,
             kepler: KeplerModel,
-            newtonian: NewtonianModel
+            newtonian: NewtonianModel,
+            einstein: EinsteinStaticModel
         };
     }
     

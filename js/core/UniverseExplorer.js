@@ -48,6 +48,10 @@ export class UniverseExplorer {
             newtonian: {
                 title: "Newtonian Gravitational Model",
                 description: "Advanced heliocentric model incorporating Newton's law of universal gravitation with comprehensive physics simulation and interactive features."
+            },
+            einstein: {
+                title: "Einstein's Static Universe Model",
+                description: "Einstein's original 1917 cosmological model featuring a finite, static universe with uniform matter distribution and cosmological constant. This model represents a closed, spherical universe that neither expands nor contracts."
             }
         };
         
