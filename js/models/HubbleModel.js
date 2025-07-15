@@ -64,36 +64,24 @@ export class HubbleModel extends BaseModel {
     }
 
     async createCelestialBodies() {
-        console.log('🌌 Creating Hubble model with', this.galaxyCount, 'galaxies...');
-        
         // Create the Milky Way at the center (our observation point)
         this.createMilkyWay();
-        console.log('✅ Created Milky Way');
         
         // Create distant galaxies with varying distances and redshift
         this.createDistantGalaxies();
-        console.log('✅ Created', this.galaxyCount, 'galaxies');
         
         // Create distance rings for visualization
         if (this.showDistanceRings) {
             this.createDistanceRings();
-            console.log('✅ Created distance rings');
         }
         
         // Create expansion vectors for educational purposes
         if (this.showExpansionVectors) {
             this.createExpansionVectors();
-            console.log('✅ Created expansion vectors');
         }
         
         // Add cosmic microwave background representation
         this.createCosmicBackground();
-        console.log('✅ Created cosmic background');
-        
-        console.log('🎉 Hubble model creation complete!', {
-            celestialBodies: Object.keys(this.celestialBodies).length,
-            temporaryObjects: this.temporaryObjects.length
-        });
     }
 
     createMilkyWay() {
@@ -274,6 +262,9 @@ export class HubbleModel extends BaseModel {
                 name: 'Expansion Direction'
             };
             
+            // Add a label to explain what the arrow represents
+            this.addArrowLabel(arrowGroup, 'Universal Expansion');
+            
             this.temporaryObjects.push(arrowGroup);
         }
     }
@@ -295,6 +286,41 @@ export class HubbleModel extends BaseModel {
         };
         
         this.temporaryObjects.push(background);
+    }
+
+    addArrowLabel(arrowGroup, text) {
+        // Create a text label for the expansion arrow
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 256;
+        canvas.height = 64;
+        
+        // Background with slight transparency
+        context.fillStyle = 'rgba(0, 40, 0, 0.8)';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // White text
+        context.fillStyle = '#00FF00';
+        context.font = 'bold 16px Arial';
+        context.textAlign = 'center';
+        context.fillText(text, canvas.width / 2, canvas.height / 2 + 6);
+        
+        // Smaller explanatory text
+        context.fillStyle = '#CCFFCC';
+        context.font = '12px Arial';
+        context.fillText('(Hubble Flow)', canvas.width / 2, canvas.height / 2 + 24);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ 
+            map: texture, 
+            transparent: true,
+            alphaTest: 0.1
+        });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(6, 1.5, 1);
+        sprite.position.set(0, 6, 0); // Above the arrow
+        
+        arrowGroup.add(sprite);
     }
 
     updateAnimations(time, speed) {
