@@ -12,8 +12,17 @@ import { NewtonianModel } from './NewtonianModel.js';
 import { EinsteinStaticModel } from './EinsteinStaticModel.js';
 import { HubbleModel } from './HubbleModel.js';
 
+console.log('🔥 IMPORT TEST: HubbleModel =', HubbleModel);
+
 export class ModelFactory {
     constructor() {
+        // Debug: Check if HubbleModel imported correctly
+        console.log('🔍 ModelFactory Debug:', {
+            HubbleModel: HubbleModel,
+            HubbleModelType: typeof HubbleModel,
+            HubbleModelName: HubbleModel?.name
+        });
+        
         // Model registry - makes it easy to add new models
         this.modelRegistry = {
             aristotle: AristotleModel,
@@ -25,6 +34,10 @@ export class ModelFactory {
             einstein: EinsteinStaticModel,
             hubble: HubbleModel
         };
+        
+        // Debug: Check registry contents
+        console.log('📋 ModelFactory Registry:', Object.keys(this.modelRegistry));
+        console.log('🎯 Hubble in registry:', this.modelRegistry.hubble);
     }
     
     /**
@@ -35,9 +48,19 @@ export class ModelFactory {
      * @returns {BaseModel} Model instance
      */
     async createModel(modelName, scene, textureManager) {
+        console.log(`🚀 Creating model: "${modelName}"`);
+        console.log('🔍 Registry check:', {
+            requestedModel: modelName,
+            availableModels: Object.keys(this.modelRegistry),
+            modelExists: this.modelRegistry.hasOwnProperty(modelName),
+            modelClass: this.modelRegistry[modelName]
+        });
+        
         const ModelClass = this.modelRegistry[modelName];
         
         if (!ModelClass) {
+            console.error(`❌ Model not found: "${modelName}"`);
+            console.error('Available models:', Object.keys(this.modelRegistry));
             throw new Error(`Unknown model type: ${modelName}`);
         }
         
