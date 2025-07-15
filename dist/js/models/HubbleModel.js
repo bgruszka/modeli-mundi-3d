@@ -36,7 +36,7 @@ export class HubbleModel extends BaseModel {
         this.hubbleConstant = 0.002;        // H₀ scaled for visualization (actual ~70 km/s/Mpc)
         this.galaxyCount = 100;             // Observable galaxies in all directions
         this.maxDistance = 70;              // Observable universe radius for visualization (scaled to match camera)
-        this.expansionRate = 1.0;           // Animation speed factor
+        this.expansionRate = 1.5;           // Animation speed factor (faster for visibility)
         this.lightSpeed = 10;               // Speed of light scaled for visualization
         
         // Redshift and visual parameters
@@ -205,13 +205,15 @@ export class HubbleModel extends BaseModel {
     createDistanceRings() {
         // Create concentric rings to show distance scales
         const ringDistances = [15, 30, 45, 60];
+        const ringLabels = ['15 Mpc', '30 Mpc', '45 Mpc', '60 Mpc'];
         
         ringDistances.forEach((radius, index) => {
-            const ringGeometry = new THREE.RingGeometry(radius - 0.5, radius + 0.5, 64);
+            // Make rings more visible
+            const ringGeometry = new THREE.RingGeometry(radius - 0.3, radius + 0.3, 64);
             const ringMaterial = new THREE.MeshBasicMaterial({
-                color: 0x444444,
+                color: 0x666699,  // Slight blue tint
                 transparent: true,
-                opacity: 0.15,
+                opacity: 0.4,     // More visible
                 side: THREE.DoubleSide
             });
             
@@ -220,11 +222,43 @@ export class HubbleModel extends BaseModel {
             ring.userData = {
                 type: 'distance_ring',
                 radius: radius,
-                name: `${radius} Mpc`
+                name: ringLabels[index]
             };
+            
+            // Add a label for each ring
+            this.addRingLabel(ring, ringLabels[index], radius);
             
             this.temporaryObjects.push(ring);
         });
+    }
+
+    addRingLabel(ring, text, radius) {
+        // Create a text label for the distance ring
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 128;
+        canvas.height = 32;
+        
+        // Background
+        context.fillStyle = 'rgba(100, 100, 150, 0.7)';
+        context.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Text
+        context.fillStyle = '#CCCCFF';
+        context.font = 'bold 14px Arial';
+        context.textAlign = 'center';
+        context.fillText(text, canvas.width / 2, canvas.height / 2 + 5);
+        
+        const texture = new THREE.CanvasTexture(canvas);
+        const material = new THREE.SpriteMaterial({ 
+            map: texture, 
+            transparent: true
+        });
+        const sprite = new THREE.Sprite(material);
+        sprite.scale.set(8, 2, 1);
+        sprite.position.set(radius, 2, 0); // Position on the ring
+        
+        ring.add(sprite);
     }
 
     createExpansionVectors() {
@@ -344,11 +378,15 @@ export class HubbleModel extends BaseModel {
                 const newVelocity = this.hubbleConstant * newDistance;
                 const newRedshift = Math.min(newVelocity / this.lightSpeed, 0.8);
                 
-                // Update color based on new redshift
+                // Update color based on new redshift (more dramatic changes)
                 const colorIndex = Math.floor(newRedshift * (this.redshiftColors.length - 1));
                 const newColor = this.redshiftColors[Math.min(colorIndex, this.redshiftColors.length - 1)];
                 body.object.material.color.setHex(newColor);
-                body.object.material.opacity = Math.max(0.3, 1 - newRedshift);
+                
+                // More dramatic opacity change and add emissive color for redshift effect
+                body.object.material.opacity = Math.max(0.4, 1 - newRedshift * 0.6);
+                body.object.material.emissive.setHex(newColor);
+                body.object.material.emissiveIntensity = newRedshift * 0.1;
                 
                 // Update metadata
                 body.distance = newDistance;
