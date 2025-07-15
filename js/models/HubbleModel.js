@@ -34,8 +34,8 @@ export class HubbleModel extends BaseModel {
         
         // Physical parameters based on Hubble's observations
         this.hubbleConstant = 0.002;        // H₀ scaled for visualization (actual ~70 km/s/Mpc)
-        this.galaxyCount = 200;             // Observable galaxies in all directions
-        this.maxDistance = 120;             // Observable universe radius for visualization
+        this.galaxyCount = 100;             // Observable galaxies in all directions
+        this.maxDistance = 70;              // Observable universe radius for visualization (scaled to match camera)
         this.expansionRate = 1.0;           // Animation speed factor
         this.lightSpeed = 10;               // Speed of light scaled for visualization
         
@@ -64,24 +64,36 @@ export class HubbleModel extends BaseModel {
     }
 
     async createCelestialBodies() {
+        console.log('🌌 Creating Hubble model with', this.galaxyCount, 'galaxies...');
+        
         // Create the Milky Way at the center (our observation point)
         this.createMilkyWay();
+        console.log('✅ Created Milky Way');
         
         // Create distant galaxies with varying distances and redshift
         this.createDistantGalaxies();
+        console.log('✅ Created', this.galaxyCount, 'galaxies');
         
         // Create distance rings for visualization
         if (this.showDistanceRings) {
             this.createDistanceRings();
+            console.log('✅ Created distance rings');
         }
         
         // Create expansion vectors for educational purposes
         if (this.showExpansionVectors) {
             this.createExpansionVectors();
+            console.log('✅ Created expansion vectors');
         }
         
         // Add cosmic microwave background representation
         this.createCosmicBackground();
+        console.log('✅ Created cosmic background');
+        
+        console.log('🎉 Hubble model creation complete!', {
+            celestialBodies: Object.keys(this.celestialBodies).length,
+            temporaryObjects: this.temporaryObjects.length
+        });
     }
 
     createMilkyWay() {
@@ -119,8 +131,6 @@ export class HubbleModel extends BaseModel {
             distance: 0,
             velocity: 0
         };
-        
-        this.scene.add(milkyWay);
     }
 
     createDistantGalaxies() {
@@ -198,16 +208,15 @@ export class HubbleModel extends BaseModel {
             const light = new THREE.PointLight(galaxyColor, 0.1, distance * 0.5);
             light.position.set(x, y, z);
             this.temporaryObjects.push(light);
-            this.scene.add(light);
         }
         
-        this.scene.add(galaxy);
+        this.temporaryObjects.push(galaxy);
         return galaxy;
     }
 
     createDistanceRings() {
         // Create concentric rings to show distance scales
-        const ringDistances = [20, 40, 60, 80, 100];
+        const ringDistances = [15, 30, 45, 60];
         
         ringDistances.forEach((radius, index) => {
             const ringGeometry = new THREE.RingGeometry(radius - 0.5, radius + 0.5, 64);
@@ -227,7 +236,6 @@ export class HubbleModel extends BaseModel {
             };
             
             this.temporaryObjects.push(ring);
-            this.scene.add(ring);
         });
     }
 
@@ -237,7 +245,7 @@ export class HubbleModel extends BaseModel {
         
         for (let i = 0; i < arrowCount; i++) {
             const angle = (i / arrowCount) * Math.PI * 2;
-            const distance = 30;
+            const distance = 20;
             const x = Math.cos(angle) * distance;
             const z = Math.sin(angle) * distance;
             
@@ -267,13 +275,12 @@ export class HubbleModel extends BaseModel {
             };
             
             this.temporaryObjects.push(arrowGroup);
-            this.scene.add(arrowGroup);
         }
     }
 
     createCosmicBackground() {
         // Create a subtle cosmic microwave background representation
-        const backgroundGeometry = new THREE.SphereGeometry(this.maxDistance * 1.5, 32, 16);
+        const backgroundGeometry = new THREE.SphereGeometry(this.maxDistance * 1.2, 32, 16);
         const backgroundMaterial = new THREE.MeshBasicMaterial({
             color: 0x221122,
             transparent: true,
@@ -288,7 +295,6 @@ export class HubbleModel extends BaseModel {
         };
         
         this.temporaryObjects.push(background);
-        this.scene.add(background);
     }
 
     updateAnimations(time, speed) {
