@@ -48,6 +48,10 @@ export class UniverseExplorer {
             newtonian: {
                 title: "Newtonian Gravitational Model",
                 description: "Advanced heliocentric model incorporating Newton's law of universal gravitation with comprehensive physics simulation and interactive features."
+            },
+            einstein: {
+                title: "Einstein's Static Universe Model (1917)",
+                description: "Einstein's groundbreaking first application of general relativity to cosmology, proposing a finite, static universe to solve the cosmological problem. This model introduces the famous cosmological constant (Λ) to balance gravitational collapse, creating a stable, closed universe with uniform matter distribution. Though later abandoned after Hubble's discovery of cosmic expansion, this model laid the foundation for modern cosmology and demonstrated Einstein's revolutionary approach to understanding the universe's structure. Key features include: spherical geometry with finite but unbounded space, uniform matter density, static spacetime (no expansion), and the cosmological constant as a repulsive force. This visualization shows 150 galaxies distributed uniformly throughout the finite cosmos, surrounded by the cosmological constant field, emphasizing the model's elegant mathematical description of a balanced, eternal universe."
             }
         };
         

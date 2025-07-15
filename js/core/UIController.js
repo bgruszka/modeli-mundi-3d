@@ -461,7 +461,8 @@ export class UIController {
                 copernican: "Copernican Model",
                 galilean: "Galilean Model",
                 kepler: "Kepler's Model",
-                newtonian: "Newtonian Model"
+                newtonian: "Newtonian Model",
+                einstein: "Einstein's Static Model"
             };
             this.showFeedback(`${modelNames[modelName]} loaded`);
         }
