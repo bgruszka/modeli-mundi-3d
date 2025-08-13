@@ -31,7 +31,7 @@
   "bugs": {
     "url": "https://github.com/bgruszka/modeli-mundi-3d/issues"
   },
-  "homepage": "https://gruszka.dev/modeli-mundi-3d",
+  "homepage": "https://modeli-mundi-3d.gruszka.dev",
   "dependencies": {
     "@capacitor/android": "^7.4.0",
     "@capacitor/core": "^7.4.0"
