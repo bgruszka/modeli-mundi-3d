@@ -6,7 +6,7 @@ An interactive web application that visualizes different historical models of th
 
 ## 🌐 Live Demo
 
-**View the application live:** [https://bgruszka.github.io/modeli-mundi-3d](https://bgruszka.github.io/modeli-mundi-3d)
+**View the application live:** [https://gruszka.dev/apps/modeli-mundi-3d/](https://gruszka.dev/apps/modeli-mundi-3d/)
 
 ## Features
 
