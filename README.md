@@ -16,6 +16,7 @@ An interactive web application that visualizes different historical models of th
 - **Copernican Model (1543)**: Revolutionary heliocentric model with circular orbits
 - **Galilean Model (1610)**: Heliocentric model featuring Jupiter's four largest moons
 - **Kepler's Model (1609)**: Refined heliocentric model with elliptical orbits
+- **Einstein's Static Model (1917)**: Finite, static universe with cosmological constant Λ
 
 ### 🎮 Interactive Features
 - **3D Navigation**: Rotate, zoom, and pan around each cosmic model
@@ -178,6 +179,9 @@ Enhanced the Copernican model by incorporating Galileo's telescopic discoveries,
 
 ### Kepler's Elliptical Orbits
 The most accurate historical model, using elliptical rather than circular orbits based on careful observations of Mars. This model could accurately predict planetary positions and formed the basis for Newton's laws.
+
+### Einstein's Static Universe Model
+Einstein's revolutionary 1917 cosmological model representing the first application of general relativity to cosmology. Features a finite, static universe with uniform matter distribution and the cosmological constant Λ. This model introduced the concept of a closed spherical geometry and perfect cosmic balance between gravity and repulsive forces. Though later superseded by expanding universe models, it laid the foundation for modern cosmology.
 
 ## Technical Details
 
