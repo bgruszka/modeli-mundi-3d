@@ -4,6 +4,10 @@ An interactive web application that visualizes different historical models of th
 
 **NEW: Now available as an Android app!** 📱
 
+## 🌐 Live Demo
+
+**View the application live:** [https://bgruszka.github.io/modeli-mundi-3d](https://bgruszka.github.io/modeli-mundi-3d)
+
 ## Features
 
 ### 🌌 Historical Models Included
@@ -218,6 +222,17 @@ The application is highly customizable:
 - Adjust camera settings in `setupScene()`
 - Change lighting in `setupLights()`
 - Customize UI styling in the CSS
+
+## 🚀 Deployment
+
+This project is automatically deployed to GitHub Pages via GitHub Actions. Any push to the `main` branch will trigger a new deployment.
+
+### Manual Deployment
+
+```bash
+# Build and deploy
+npm run deploy
+```
 
 ## Contributing
 
