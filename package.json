@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm run copy:assets",
-    "copy:assets": "mkdir -p dist/apps/modeli-mundi-3d && cp -r index.html js/ dist/apps/modeli-mundi-3d/",
+    "copy:assets": "mkdir -p dist && cp -r index.html js/ dist/",
     "android:build": "npm run build && npx cap copy android && npx cap sync android",
     "android:run": "npm run android:build && npx cap run android",
     "android:open": "npx cap open android",
@@ -31,7 +31,7 @@
   "bugs": {
     "url": "https://github.com/bgruszka/modeli-mundi-3d/issues"
   },
-  "homepage": "https://gruszka.dev/apps/modeli-mundi-3d",
+  "homepage": "https://gruszka.dev/modeli-mundi-3d",
   "dependencies": {
     "@capacitor/android": "^7.4.0",
     "@capacitor/core": "^7.4.0"
