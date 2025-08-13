@@ -225,7 +225,7 @@ The application is highly customizable:
 
 ## 🚀 Deployment
 
-This project is automatically deployed to GitHub Pages via GitHub Actions. Any push to the `main` branch will trigger a new deployment.
+This project is automatically deployed to GitHub Pages via GitHub Actions. Any push to the `master` branch will trigger a new deployment.
 
 ### Manual Deployment
 
